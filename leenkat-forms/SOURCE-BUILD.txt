@@ -1,0 +1,28 @@
+Leenkat Forms 1.0.1 — Corresponding source information
+
+The plugin's own PHP, JavaScript and CSS are shipped as readable files. No
+runtime fetch of bundled library code is needed. Optional CAPTCHA providers are
+documented separately in readme.txt.
+
+Pinned upstream project sources:
+* Choices.js 11.1.0: https://github.com/Choices-js/Choices/tree/2723dd63a43e009658f243c6606345dd470eb74c
+* flatpickr 4.6.9: https://github.com/flatpickr/flatpickr/tree/3985cc81767a8e72530404d6b76c1d3c19d4050c
+* intl-tel-input 25.12.6: https://github.com/jackocnr/intl-tel-input/tree/e67d9ceff3e169c8b38e653e77b8b18b77d16f48
+* Fuse.js 7.0.0: https://github.com/krisk/Fuse/tree/93bad125443ac05297393cf4aa222232082e2b44
+* libphonenumber: https://github.com/google/libphonenumber/tree/bd0235b04b40a017dd0ec85e48dc9bc752f431aa
+* Closure Library 20230802.0.0, flag-icons 7.3.2 and tslib 2.6.3:
+  use the exact recorded npm and submodule inputs in the source companion.
+* Country data: use the pinned iptoasn manifest and notices in assets/data.
+
+The Leenkat Forms 1.0.1 source companion includes the pinned sources and
+lockfiles, the country data generator, and instructions to rebuild and
+verify the assets in this package. See BUILD.md in that companion.
+The phone territory identifiers, calling codes and national prefixes are
+generated from pinned Apache-2.0 libphonenumber metadata. English country
+names originate in the MIT country-list and two MIT interface overrides.
+See the companion's COUNTRY-PROVENANCE.md for the routing policy.
+
+For notices and license terms see COPYING, licenses/, the component LICENSE
+files, and assets/vendor/THIRD-PARTY-NOTICES.md.
+
+Source companion publication is pending approval.

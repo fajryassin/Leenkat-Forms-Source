@@ -1,0 +1,116 @@
+{
+  "dependencies": [
+    {
+      "name": "choices.js",
+      "version": "11.1.0",
+      "tag": "v11.1.0",
+      "commit": "2723dd63a43e009658f243c6606345dd470eb74c",
+      "source": "https://github.com/Choices-js/Choices/tree/2723dd63a43e009658f243c6606345dd470eb74c",
+      "source_archive": "https://codeload.github.com/Choices-js/Choices/tar.gz/2723dd63a43e009658f243c6606345dd470eb74c",
+      "source_sha256": "609627c528ae54dc054138d22a5337c33eabc7ebe290a9a72d5da6a9664ab96c",
+      "distribution": "https://registry.npmjs.org/choices.js/-/choices.js-11.1.0.tgz",
+      "distribution_integrity": "sha512-mIt0uLhedHg2ea/K2PACrVpt391vRGHuOoctPAiHcyemezwzNMxj7jOzNEk8e7EbjLh0S0sspDkSCADOKz9kcw==",
+      "distribution_sha256": "25fdcbdd49ef761b512ecb60be0a56cb8837c7c996f15275410d095d09a40462",
+      "patches": [],
+      "rebuild_status": "BLOCKED: Phase 1B online tarball transport failures and incomplete offline pinned installations; compilation not reached"
+    },
+    {
+      "name": "flatpickr",
+      "version": "4.6.9",
+      "tag": "v4.6.9",
+      "commit": "3985cc81767a8e72530404d6b76c1d3c19d4050c",
+      "source": "https://github.com/flatpickr/flatpickr/tree/3985cc81767a8e72530404d6b76c1d3c19d4050c",
+      "source_archive": "https://codeload.github.com/flatpickr/flatpickr/tar.gz/3985cc81767a8e72530404d6b76c1d3c19d4050c",
+      "source_sha256": "2a7ede804e3e7620a2208653403ea7cf729a9db382eb303531ddc6bc287f8f28",
+      "distribution": "https://registry.npmjs.org/flatpickr/-/flatpickr-4.6.9.tgz",
+      "distribution_integrity": "sha512-F0azNNi8foVWKSF+8X+ZJzz8r9sE1G4hl06RyceIaLvyltKvDl6vqk9Lm/6AUUCi5HWaIjiUbk7UpeE/fOXOpw==",
+      "distribution_sha256": "365ec516b00b6609d0026e3962d44c936ceb3cfebde4b9fee367f929fad71ca6",
+      "patches": [
+        "Existing CSS prefix: .flatpickr-calendar * { box-sizing: border-box; } followed by LF",
+        "Append one final LF to upstream CSS and JS"
+      ],
+      "rebuild_status": "BLOCKED: Phase 1B online tarball transport failures and incomplete offline pinned installations; compilation not reached"
+    },
+    {
+      "name": "intl-tel-input",
+      "version": "25.12.6",
+      "tag": "v25.12.6",
+      "commit": "e67d9ceff3e169c8b38e653e77b8b18b77d16f48",
+      "source": "https://github.com/jackocnr/intl-tel-input/tree/e67d9ceff3e169c8b38e653e77b8b18b77d16f48",
+      "source_archive": "https://codeload.github.com/jackocnr/intl-tel-input/tar.gz/e67d9ceff3e169c8b38e653e77b8b18b77d16f48",
+      "source_sha256": "c71dedf7379dcb1fd77700cc846ac68340ebe7cd2ed7e1fbb3de3ab421509aeb",
+      "distribution": "https://registry.npmjs.org/intl-tel-input/-/intl-tel-input-25.12.6.tgz",
+      "distribution_integrity": "sha512-uHNMJ/xyFwdJRqMJvWhFIB4hrLYaOh9T5GvYYDLXxM+8dUXt9HB42IKFp+sA77r1gzrnZqlYHMbLWnbVBXPN9A==",
+      "distribution_sha256": "6b64ae93291ee59646bef4422d9120e715ebb01916613fbb4193e474b2be37d4",
+      "patches": [],
+      "rebuild_status": "BLOCKED: Phase 1B online tarball transport failures and incomplete offline pinned installations; compilation not reached"
+    }
+  ],
+  "phone_nested": [
+    {
+      "name": "google-closure-library",
+      "version": "20230802.0.0",
+      "resolved": "https://registry.npmjs.org/google-closure-library/-/google-closure-library-20230802.0.0.tgz",
+      "integrity": "sha512-h2lBEX2tjWwfR+dhFukGER15vKY+4cA3nRqwKSOsBdyizlOxTAHOWbEYiGnMoom3/SrVeQ5uG0eKsbxQ3wbsxA=="
+    },
+    {
+      "name": "google-closure-compiler",
+      "version": "20240317.0.0",
+      "resolved": "https://registry.npmjs.org/google-closure-compiler/-/google-closure-compiler-20240317.0.0.tgz",
+      "integrity": "sha512-PlC5aU2vwsypKbxyFNXOW4psDZfhDoOr2dCwuo8VcgQji+HVIgRi2lviO66x2SfTi0ilm3kI6rq/RSdOMFczcQ=="
+    },
+    {
+      "name": "flag-icons",
+      "version": "7.3.2",
+      "resolved": "https://registry.npmjs.org/flag-icons/-/flag-icons-7.3.2.tgz",
+      "integrity": "sha512-QkaZ6Zvai8LIjx+UNAHUJ5Dhz9OLZpBDwCRWxF6YErxIcR16jTkIFm3bFu54EkvKQy4+wicW+Gm7/0631wVQyQ=="
+    },
+    {
+      "name": "sharp",
+      "version": "0.33.5",
+      "resolved": "https://registry.npmjs.org/sharp/-/sharp-0.33.5.tgz",
+      "integrity": "sha512-haPVm1EkS9pgvHrQ/F3Xy+hgcuMV0Wm9vfIBSiwZ05k+xgb0PkBQpGsAA/oWdDobNaZTH5ppvHtzCFbnSEwHVw=="
+    },
+    {
+      "name": "esbuild",
+      "version": "0.25.9",
+      "resolved": "https://registry.npmjs.org/esbuild/-/esbuild-0.25.9.tgz",
+      "integrity": "sha512-CRbODhYyQx3qp7ZEwzxOk4JBqmD/seJrzPa/cGjY1VtIn5E09Oi9/dB4JwctnfZ8Q8iT7rioVv5k/FNT/uf54g=="
+    }
+  ],
+  "phone_submodules": [
+    {
+      "path": "third_party/country-list",
+      "sha": "4d8f87526c891a7b110b530eabf910c3f7468ad6"
+    },
+    {
+      "path": "third_party/libphonenumber",
+      "sha": "bd0235b04b40a017dd0ec85e48dc9bc752f431aa"
+    }
+  ],
+  "source_patches": [
+    "flatpickr v4.6.9 git tag package.json reports 4.6.8; npm distribution reports 4.6.9. Build banner version must use 4.6.9.",
+    "Source symlinks are represented in vendor-source/source-symlinks.json for Windows preparation."
+  ],
+  "bundled_choices_inputs": [
+    {
+      "name": "fuse.js",
+      "version": "7.0.0",
+      "license": "Apache-2.0",
+      "commit": "93bad125443ac05297393cf4aa222232082e2b44",
+      "preferred_source": "https://github.com/krisk/Fuse/tree/93bad125443ac05297393cf4aa222232082e2b44",
+      "local_source": "vendor-source/fuse",
+      "copyright": "2023 Kiro Risk; original inline header retained"
+    },
+    {
+      "name": "tslib",
+      "version": "2.6.3",
+      "license": "0BSD",
+      "distribution": "https://registry.npmjs.org/tslib/-/tslib-2.6.3.tgz",
+      "integrity": "sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ==",
+      "distribution_sha256": "a98498d6cd1a4e935ecc8e1687754c7da833980c247a913ca29f610a191d0a00",
+      "local_source": "vendor-source/tslib",
+      "copyright": "Microsoft Corporation; original full inline grant retained"
+    }
+  ]
+}

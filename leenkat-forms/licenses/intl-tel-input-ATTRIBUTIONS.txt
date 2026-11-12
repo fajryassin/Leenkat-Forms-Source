@@ -1,0 +1,11 @@
+intl-tel-input 25.12.6 original attributions
+
+
+* Flag images from [flag-icons](https://github.com/lipis/flag-icons)
+* Original country data from mledoze's [World countries in JSON, CSV and XML](https://github.com/mledoze/countries)
+* Formatting/validation/example number code from [libphonenumber](https://github.com/googlei18n/libphonenumber)
+* Feature contributions are listed in the wiki: [Contributions](https://github.com/jackocnr/intl-tel-input/wiki/Contributions)
+
+User testing powered by [BrowserStack Open-Source Program](https://www.browserstack.com/open-source)  
+
+Browser testing via <a href="https://www.lambdatest.com/" target="_blank"><img src="https://raw.githubusercontent.com/jackocnr/intl-tel-input/44e0e66d01e260a7c39b3405c3229b9446882cba/screenshots/LambdaTest%20logo%20-blue.svg" style="vertical-align: middle;margin-left:5px" width="147" height="26" /></a>

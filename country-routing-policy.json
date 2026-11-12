@@ -1,0 +1,222 @@
+{
+  "ag": {
+    "derive": "nanp-leading",
+    "priority": 7
+  },
+  "ai": {
+    "derive": "nanp-leading",
+    "priority": 6
+  },
+  "as": {
+    "derive": "nanp-leading",
+    "priority": 5
+  },
+  "au": {
+    "areas": [
+      "4"
+    ]
+  },
+  "ax": {
+    "areas": [
+      "18",
+      "4"
+    ],
+    "priority": 1
+  },
+  "bb": {
+    "derive": "nanp-leading",
+    "priority": 9
+  },
+  "bl": {
+    "priority": 1
+  },
+  "bm": {
+    "derive": "nanp-leading",
+    "priority": 10
+  },
+  "bq": {
+    "derive": "bonaire-leading",
+    "priority": 1
+  },
+  "bs": {
+    "derive": "nanp-leading",
+    "priority": 8
+  },
+  "ca": {
+    "derive": "canada",
+    "priority": 1
+  },
+  "cc": {
+    "areas": [
+      "4",
+      "89162"
+    ],
+    "priority": 1
+  },
+  "cx": {
+    "areas": [
+      "4",
+      "89164"
+    ],
+    "priority": 2
+  },
+  "dm": {
+    "derive": "nanp-leading",
+    "priority": 13
+  },
+  "do": {
+    "derive": "nanp-leading",
+    "priority": 2
+  },
+  "eh": {
+    "areas": [
+      "5288",
+      "5289",
+      "6",
+      "7"
+    ],
+    "priority": 1
+  },
+  "fi": {
+    "areas": [
+      "4"
+    ]
+  },
+  "gd": {
+    "derive": "nanp-leading",
+    "priority": 14
+  },
+  "gg": {
+    "areas": [
+      "1481",
+      "7781",
+      "7839",
+      "7911"
+    ],
+    "priority": 1
+  },
+  "gu": {
+    "derive": "nanp-leading",
+    "priority": 15
+  },
+  "im": {
+    "areas": [
+      "1624",
+      "74576",
+      "7524",
+      "7624",
+      "7924"
+    ],
+    "priority": 2
+  },
+  "it": {
+    "areas": [
+      "3"
+    ]
+  },
+  "je": {
+    "areas": [
+      "1534",
+      "7509",
+      "7700",
+      "7797",
+      "7829",
+      "7937"
+    ],
+    "priority": 3
+  },
+  "jm": {
+    "derive": "nanp-leading",
+    "priority": 4
+  },
+  "kn": {
+    "derive": "nanp-leading",
+    "priority": 18
+  },
+  "ky": {
+    "derive": "nanp-leading",
+    "priority": 12
+  },
+  "kz": {
+    "areas": [
+      "33",
+      "7"
+    ],
+    "priority": 1
+  },
+  "lc": {
+    "derive": "nanp-leading",
+    "priority": 19
+  },
+  "ma": {
+    "areas": [
+      "6",
+      "7"
+    ]
+  },
+  "mf": {
+    "priority": 2
+  },
+  "mp": {
+    "derive": "nanp-leading",
+    "priority": 17
+  },
+  "ms": {
+    "derive": "nanp-leading",
+    "priority": 16
+  },
+  "no": {
+    "areas": [
+      "4",
+      "9"
+    ]
+  },
+  "pr": {
+    "derive": "nanp-leading",
+    "priority": 3
+  },
+  "ru": {
+    "areas": [
+      "33"
+    ]
+  },
+  "sj": {
+    "derive": "svalbard",
+    "priority": 1
+  },
+  "sx": {
+    "derive": "nanp-leading",
+    "priority": 21
+  },
+  "tc": {
+    "derive": "nanp-leading",
+    "priority": 23
+  },
+  "tt": {
+    "derive": "nanp-leading",
+    "priority": 22
+  },
+  "va": {
+    "derive": "vatican",
+    "priority": 1
+  },
+  "vc": {
+    "derive": "nanp-leading",
+    "priority": 20
+  },
+  "vg": {
+    "derive": "nanp-leading",
+    "priority": 11
+  },
+  "vi": {
+    "derive": "nanp-leading",
+    "priority": 24
+  },
+  "yt": {
+    "areas": [
+      "269",
+      "639"
+    ],
+    "priority": 1
+  }
+}

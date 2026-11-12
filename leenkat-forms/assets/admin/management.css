@@ -1,0 +1,219 @@
+/* Administration list screens only. Measurements follow WordPress/WPForms lists. */
+.lkf-management {
+    --lkf-accent:var(--leenkat-primary);
+    margin:0 0 0 -20px;
+    color:#50575e;
+}
+.rtl .lkf-management {margin:0 -20px 0 0}
+.lkf-management-brand {display:flex;align-items:center;gap:12px;min-height:110px;box-sizing:border-box;padding:20px;border-top:3px solid var(--lkf-accent);background:#f1f1f1}
+.lkf-management-brand img {width:64px;height:64px;object-fit:contain}
+.lkf-management-brand span {font-size:30px;font-weight:600;line-height:1.2;color:#3c434a;letter-spacing:-.7px}
+.lkf-management-heading {display:flex;align-items:center;gap:20px;padding:15px 20px;background:#fff;min-height:60px;box-sizing:border-box}
+.lkf-management .lkf-management-heading h1 {padding:0;margin:0;color:#101517}
+.lkf-management .page-title-action {position:static;display:inline-flex;align-items:center;gap:4px;margin:0;min-height:30px;box-sizing:border-box;padding:0 10px;border:1px solid var(--lkf-accent);border-radius:3px;background:var(--lkf-accent);color:#fff;font-size:13px;line-height:normal;font-weight:500;text-decoration:none}
+.lkf-management .page-title-action:hover {background:var(--leenkat-primary-hover);border-color:var(--leenkat-primary-hover)}
+.lkf-management-content {padding:20px}
+.lkf-management h2 {font-weight:600;margin:0 0 20px;color:#3c434a}
+.lkf-management .lkf-section-title {margin:4px 0 20px}
+.lkf-list-toolbar {display:flex;align-items:center;justify-content:space-between;gap:16px;margin:10px 0 15px;flex-wrap:wrap}
+.lkf-management .subsubsub {float:none;margin:0;font-size:13px}
+.lkf-list-search {display:flex;align-items:center;gap:7px;margin:0;flex-wrap:wrap}
+.lkf-management input[type=search] {width:165px;min-height:30px;height:32px;padding:0 8px;margin:0;border:1px solid #949494;border-radius:3px;background:#fff}
+.lkf-management select {max-width:100%;margin:0;border-color:#949494;border-radius:3px}
+.lkf-management .button {padding-inline:10px;border-radius:3px;border-color:#8c8f94;background:#f6f7f7;color:#3c434a;box-shadow:none}
+.lkf-management .button:hover {border-color:var(--lkf-accent);color:var(--lkf-accent);background:#fff}
+.lkf-management .lkf-list-search .button {min-height:32px;line-height:30px}
+.lkf-management .lkf-columns-toggle {width:32px;padding:0;display:inline-flex;align-items:center;justify-content:center}
+/* Core buttons size the icon line for the whole button. Here flex centers the icon box. */
+.lkf-management .lkf-columns-toggle > .dashicons {flex:none;width:20px;height:20px;font-size:20px;line-height:1}
+@media(max-width:782px){
+    .lkf-management .lkf-list-search .button {min-height:40px}
+}
+.lkf-management a {color:var(--lkf-accent)}
+.lkf-management a:hover {color:var(--leenkat-primary-hover)}
+.lkf-management .page-title-action {color:#fff}
+.lkf-management .tablenav {margin:0 0 10px;height:auto;min-height:30px;padding:0}
+.lkf-management .tablenav.bottom {margin:10px 0 0}
+.lkf-management .tablenav .actions {padding-inline-end:8px}
+.lkf-management .tablenav .actions select {float:none;margin-inline-end:6px}
+.lkf-management .tablenav .tablenav-pages {font-size:13px;line-height:30px;margin:0;float:right}
+.rtl .lkf-management .tablenav .tablenav-pages {float:left}
+.lkf-management .tablenav-pages .displaying-num {margin-inline-end:8px}
+.lkf-management .tablenav-pages .pagination-links a,.lkf-management .tablenav-pages .pagination-links .tablenav-pages-navspan {min-width:30px;min-height:30px;box-sizing:border-box;padding:0 5px;line-height:28px;font-size:16px;border-radius:3px}
+.lkf-management .tablenav-pages .current-page {width:38px;min-height:30px;line-height:28px;border-radius:3px;font-size:13px;padding:0 5px}
+.lkf-management .lkf-list-table {border:1px solid #c3c4c7;border-radius:4px;border-spacing:0;background:#fff;box-shadow:0 1px 1px #0000000a}
+.lkf-management .lkf-list-table th {font-weight:400;color:#2c3338;padding:8px 10px}
+.lkf-management .lkf-list-table th.sortable,.lkf-management .lkf-list-table th.sorted {padding:0}
+.lkf-management .lkf-list-table th.sortable a,.lkf-management .lkf-list-table th.sorted a {padding:8px 10px}
+.lkf-management .lkf-list-table td {padding:10px;line-height:19.5px;vertical-align:top;color:#50575e;overflow-wrap:anywhere}
+.lkf-management .lkf-list-table .check-column {width:2.2em;padding:10px 0 0 10px}
+.rtl .lkf-management .lkf-list-table .check-column {padding:10px 10px 0 0}
+.lkf-management .lkf-list-table .check-column input {margin:0;vertical-align:middle}
+.lkf-management .lkf-list-table .row-title,
+.lkf-management .lkf-list-table .row-actions {line-height:16.9px}
+.lkf-management .row-actions button {font:inherit;line-height:inherit;vertical-align:baseline;text-decoration:none;color:var(--lkf-accent)}
+.lkf-management .row-actions .submitdelete {color:#b32d2e}
+.lkf-management .lkf-form-state {font-size:12px;color:#787c82;font-weight:400}
+.lkf-management .column-name {width:auto}
+.lkf-management .column-tags {width:25%}
+.lkf-management .column-author {width:10%}
+.lkf-management .column-date {width:18%}
+.lkf-management .column-entries {width:8%}
+.lkf-management .column-all_time,.lkf-management .column-period {text-align:center;width:15%}
+.lkf-management .column-created,.lkf-management .column-last_entry {width:19%}
+.lkf-management .column-entry {width:23%}
+.lkf-management .column-status {width:10%}
+.lkf-management .lkf-entry-new {font-size:11px;font-weight:600;padding:1px 5px;margin-inline-start:4px;color:var(--leenkat-primary);background:var(--leenkat-primary-light);border-radius:3px}
+.lkf-management .lkf-entry-star {color:var(--leenkat-accent-hover)}
+.lkf-management .lkf-form-heading {display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;margin:0 0 20px}
+.lkf-management .lkf-form-heading h2 {margin:0}
+.lkf-management .lkf-back {margin:0 0 18px}
+.lkf-management .description {font-size:13px;margin-top:15px;color:#646970}
+.lkf-management .notice {margin:0 0 20px}
+.lkf-inbox-heading {display:flex;align-items:flex-end;justify-content:space-between;gap:20px;border-bottom:1px solid #dcdcde;padding:2px 0 15px;margin:0 0 22px}
+.lkf-form-picker {display:flex;flex-direction:column;align-items:flex-start;max-width:55%;gap:6px}
+.lkf-form-picker label {font-size:inherit;line-height:inherit;color:#8c8f94;text-transform:uppercase}
+.lkf-management .lkf-form-picker select {border:0;box-shadow:none;background-color:transparent;min-width:180px;max-width:100%;padding-inline-start:0;color:#101517}
+.lkf-inbox-tools {display:flex;flex-wrap:wrap;gap:16px;font-size:13px;line-height:24px;justify-content:flex-end}
+.lkf-inbox-tools a {text-decoration:none;white-space:nowrap}
+.lkf-inbox-tools .dashicons {font-size:16px;width:16px;height:18px;vertical-align:middle;margin-inline-end:3px}
+.lkf-management .lkf-inbox-toolbar {margin:0 0 10px;gap:12px;align-items:flex-end}
+.lkf-inbox-toolbar .lkf-list-search #lkf-search-field {width:148px}
+.lkf-inbox-toolbar .lkf-list-search #lkf-search-operator {width:96px}
+.lkf-inbox-toolbar .lkf-list-search input[type=search] {width:175px}
+.lkf-management .lkf-inbox-table .column-name {width:20%}
+.lkf-management .lkf-inbox-table .column-email {width:26%}
+.lkf-management .lkf-inbox-table .column-date {width:auto}
+.lkf-management .lkf-inbox-table .column-actions {width:180px;position:relative}
+.lkf-management .lkf-inbox-table th.column-actions {padding-inline-end:40px}
+.lkf-management .lkf-inbox-table .check-column {width:86px;padding-inline-start:10px}
+.lkf-management .lkf-inbox-table td {padding:9px 10px 8px}
+.lkf-management .lkf-inbox-table td.column-name {padding:8px 10px}
+.lkf-entry-select {display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.lkf-management .lkf-entry-icon {border:0;background:none;box-shadow:none;display:inline-flex;align-items:center;justify-content:center;width:20px;height:24px;padding:0;cursor:pointer;color:#b8bdc2}
+.lkf-entry-icon .dashicons {font-size:17px;width:18px;height:18px}
+.lkf-entry-icon.is-active[value^="unstar:"] {color:var(--leenkat-accent-hover)}
+.lkf-entry-icon.is-active[value^="mark_read:"] {color:var(--leenkat-primary)}
+.lkf-entry-icon[value^="mark_read:"] .dashicons::before {content:"";display:block;width:9px;height:9px;border:2px solid currentColor;border-radius:50%;margin:2px}
+.lkf-entry-icon[value^="mark_unread:"] .dashicons::before {content:"";display:block;width:8px;height:8px;border:2px solid currentColor;border-radius:50%;background:currentColor;margin:3px}
+.lkf-entry-actions {white-space:nowrap;text-align:end}
+.lkf-entry-actions a,.lkf-entry-actions button {font:inherit;line-height:inherit;text-decoration:none;vertical-align:baseline}
+.lkf-entry-actions .submitdelete {color:#b32d2e}
+.lkf-entry-actions>span {color:#a7aaad;font-size:11px;margin-inline:2px}
+.lkf-inbox-columns {position:absolute;inset-inline-end:7px;top:4px;border:0;background:transparent;padding:2px;cursor:pointer;color:#8c8f94}
+.lkf-inbox-table tfoot .lkf-inbox-columns {display:none}
+.lkf-date-actions {display:flex;align-items:flex-start;gap:6px}
+.lkf-date-range {position:relative;width:210px}
+.lkf-date-range summary {list-style:none;cursor:pointer;background:#fff;border:1px solid #8c8f94;border-radius:3px;line-height:28px;height:30px;box-sizing:border-box;padding:0 10px;color:#787c82;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lkf-date-range summary::-webkit-details-marker {display:none}
+.lkf-date-popover {position:absolute;z-index:20;inset-inline-start:0;top:35px;background:#fff;border:1px solid #c3c4c7;border-radius:4px;box-shadow:0 3px 12px #0002;padding:12px;display:grid;gap:10px;width:235px;box-sizing:border-box}
+.lkf-date-popover label {display:grid;gap:4px;font-size:13px}
+.lkf-management .lkf-date-popover input {font-size:13px;max-width:100%;width:100%;box-sizing:border-box;min-height:30px}
+.lkf-management .lkf-entry-inbox .tablenav .actions {overflow:visible}
+.lkf-management-heading .lkf-back-button {font-size:13px;gap:6px}
+.lkf-management-heading .lkf-back-button .dashicons {font-size:17px;line-height:28px}
+.lkf-entry-pager {display:flex;align-items:center;gap:5px;margin-inline-start:auto;color:#8c8f94;font-size:13px}
+.lkf-entry-pager>span:first-child {margin-inline-end:10px}
+.lkf-management .lkf-entry-pager .button {padding:0 6px;display:inline-flex;align-items:center;justify-content:center;width:30px;color:#8c8f94}
+.lkf-entry-pager .dashicons {font-size:16px;width:16px;height:16px}
+.lkf-entry-view {padding-top:10px}
+.lkf-entry-layout {display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px;align-items:start}
+.lkf-entry-card {background:#fff;border:1px solid #c3c4c7;border-radius:4px;box-shadow:0 1px 1px #0000000a;margin:0 0 20px;overflow:hidden}
+.lkf-management .lkf-entry-card h2 {margin:0;padding:12px 15px;border-bottom:1px solid #c3c4c7;color:#101517}
+.lkf-entry-values {margin:0;font-size:13px;line-height:19.5px}
+.lkf-entry-values dt {background:#f7f7f7;font-weight:600;padding:8px 12px;margin:0}
+.lkf-entry-values dd {padding:8px 12px;margin:0;min-height:18.2px;overflow-wrap:anywhere;word-break:normal}
+.lkf-entry-values dd .dashicons {font-size:17px;width:18px;height:18px;color:#8c8f94;vertical-align:middle}
+.lkf-entry-meta {padding:0 12px 4px}
+.lkf-entry-meta p {display:flex;gap:9px;margin:12px 0;overflow-wrap:anywhere}
+.lkf-entry-meta .dashicons {flex:0 0 22px;font-size:22px;width:22px;height:22px;color:#8c8f94}
+.lkf-entry-meta strong {font-weight:500}
+.lkf-entry-card-footer {background:#f7f7f7;border-top:1px solid #c3c4c7;padding:12px}
+.lkf-entry-card-footer form,.lkf-entry-tool-list form {margin:0}
+.lkf-entry-tool-list {display:grid;gap:14px;padding:14px}
+.lkf-entry-tool-list a,.lkf-entry-tool-list button,.lkf-entry-card-footer button {display:inline-flex;align-items:center;gap:10px;font:inherit;font-size:13px;line-height:22px;text-decoration:none;text-align:start}
+.lkf-entry-tool-list .dashicons,.lkf-entry-card-footer .dashicons {font-size:22px;width:22px;height:22px;color:#8c8f94}
+.lkf-entry-tool-list .submitdelete,.lkf-entry-card-footer .submitdelete {color:#b32d2e}
+.lkf-entry-main {min-width:0}
+.lkf-entry-main .widefat {border:0;box-shadow:none}
+.lkf-entry-main .widefat td,.lkf-entry-main .widefat th {font-size:13px;overflow-wrap:anywhere}
+.rtl .lkf-entry-pager .dashicons,.rtl .lkf-back-button .dashicons {transform:scaleX(-1)}
+@media screen and (max-width:1100px) {
+    .lkf-inbox-heading {align-items:flex-start}
+    .lkf-inbox-tools {gap:9px}
+    .lkf-entry-layout {grid-template-columns:minmax(0,1fr) 260px}
+}
+.lkf-management button:focus-visible,.lkf-management a:focus-visible {outline:2px solid var(--lkf-accent);outline-offset:2px}
+@media screen and (max-width:782px) {
+    .lkf-management {margin-inline-start:-10px}
+    .rtl .lkf-management {margin:0 -10px 0 0}
+    .lkf-management-brand {min-height:90px;padding:15px}
+    .lkf-management-brand span {font-size:26px}
+    .lkf-management-heading,.lkf-management-content {padding:15px}
+    .lkf-list-toolbar,.lkf-list-search {align-items:stretch;width:100%;gap:8px}
+    .lkf-management input[type=search] {flex:1;min-width:100px;max-width:100%;height:40px}
+    .lkf-management .tablenav .tablenav-pages {float:none;width:100%;text-align:end;margin:12px 0 0}
+    .lkf-management .tablenav.top .tablenav-pages {margin-bottom:8px}
+    .lkf-management .lkf-list-table .check-column {width:35px;flex:0 0 35px;box-sizing:border-box}
+    .lkf-management .lkf-list-table .column-primary {width:auto}
+    .lkf-management .lkf-list-table .row-actions {position:static}
+    .lkf-management .lkf-list-table tr:not(.inline-edit-row):not(.no-items) td:not(.column-primary):not(.check-column) {padding-inline-start:35%;width:auto;text-align:start}
+    .lkf-management .lkf-list-table td.column-primary {padding-inline-end:45px}
+    .lkf-management .lkf-list-table .toggle-row {top:5px;inset-inline-end:4px}
+    .lkf-management .lkf-list-table .row-actions button,.lkf-management .lkf-list-table .row-actions a {display:inline-block;min-height:32px;line-height:32px}
+    .lkf-inbox-heading {flex-direction:column;gap:12px;margin-bottom:18px}
+    .lkf-form-picker {max-width:100%;width:100%}
+    .lkf-inbox-tools {justify-content:flex-start;gap:12px;line-height:28px}
+    .lkf-inbox-toolbar .lkf-list-search #lkf-search-field {flex:1;width:auto;min-width:140px}
+    .lkf-inbox-toolbar .lkf-list-search #lkf-search-operator {width:120px}
+    .lkf-inbox-toolbar .lkf-list-search input[type=search] {width:auto;min-width:160px}
+    .lkf-management .lkf-inbox-table .check-column {width:96px;flex:0 0 96px;padding-inline-start:8px}
+    .lkf-entry-select {gap:4px}
+    .lkf-management .lkf-entry-icon {width:24px;height:28px}
+    .lkf-management .lkf-inbox-table .column-name {width:auto}
+    .lkf-management .lkf-inbox-table td.column-actions {padding-inline-start:10px!important}
+    .lkf-inbox-table td.column-actions::before {display:none!important}
+    .lkf-entry-actions {text-align:start;white-space:normal;display:flex;flex-wrap:wrap;align-items:center;gap:4px}
+    .lkf-entry-actions a,.lkf-entry-actions button {min-height:32px;line-height:32px}
+    .lkf-inbox-columns {display:none}
+    .lkf-date-range {width:190px;max-width:100%}
+    .lkf-date-range summary {height:40px;line-height:38px}
+    .lkf-date-popover {top:44px}
+    .lkf-management .lkf-entry-inbox .tablenav .actions {float:none;display:flex;margin-bottom:8px}
+    .lkf-management-heading {flex-wrap:wrap;gap:10px}
+    .lkf-entry-pager {width:100%;margin:6px 0 0;justify-content:flex-end}
+    .lkf-entry-layout {grid-template-columns:minmax(0,1fr)}
+    .lkf-entry-view {padding-top:0}
+    .lkf-entry-tool-list a,.lkf-entry-tool-list button {min-height:32px}
+}
+@media print {
+    #adminmenumain,#wpadminbar,#wpfooter,#screen-meta,#screen-meta-links,.lkf-management-brand,.lkf-back-button,.lkf-entry-pager,.lkf-entry-sidebar,.lkf-management .notice {display:none!important}
+    #wpcontent {margin:0!important;padding:0!important}
+    .lkf-management {margin:0!important}
+    .lkf-management-content {padding:0}
+    .lkf-entry-layout {display:block}
+    .lkf-entry-card {break-inside:auto;box-shadow:none}
+    .lkf-entry-values dt {break-after:avoid}
+    .lkf-entry-values dd {break-before:avoid}
+}
+/* Attachment Security reuses the administration header and table styling. */
+.lkf-attachment-security{max-width:1200px;min-width:0}
+.lkf-attachment-security .description{font-size:13px;color:#687d8d}
+.lkf-attachment-security .notice{margin-inline:0;overflow-wrap:anywhere}
+.lkf-security-intro{margin:0 0 20px}
+.lkf-security-section{margin:28px 0 0;padding:0 0 28px;border-bottom:1px solid #ddd}
+.lkf-security-section h2{margin-bottom:14px}
+.lkf-security-section h3{margin:26px 0 12px;overflow-wrap:anywhere}
+.lkf-attachment-security .lkf-list-table{width:100%;table-layout:fixed}
+.lkf-attachment-security .lkf-list-table th,.lkf-attachment-security .lkf-list-table td{overflow-wrap:anywhere;text-align:start}
+.lkf-security-inventory th:first-child{width:82%}
+.lkf-security-inventory tbody th{font-size:13px}
+.lkf-security-report th:first-child{width:10%}
+.lkf-security-report th:nth-child(2){width:32%}
+.lkf-security-report th:nth-child(3){width:14%}
+.lkf-security-action{margin:20px 0 0}
+.lkf-security-action label{line-height:1.6}
+.lkf-attachment-security .button{max-width:100%;white-space:normal;height:auto;min-height:32px;padding-inline:12px}
+.lkf-attachment-security .button-primary{background:var(--leenkat-primary);border-color:var(--leenkat-primary);color:#fff}
+.lkf-attachment-security .button-primary:hover{background:var(--leenkat-primary-hover);border-color:var(--leenkat-primary-hover);color:#fff}
+@media(max-width:782px){.lkf-attachment-security .lkf-list-table td{padding:10px!important}.lkf-security-inventory th:first-child{width:75%}.lkf-security-report th,.lkf-security-report td{padding:8px 6px!important}}

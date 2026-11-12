@@ -1,0 +1,66 @@
+/* Official Leenkat administration palette. Never loaded on public forms or email documents. */
+:where(.lkf-management,.lkf-global-settings,.lkf-tools,#lkf-builder-root,.lkf-builder,.lkf-delete-modal,.lkf-import-dialog,.lkf-template-modal,.lkf-smart-tags-modal,.lkf-pointer-ghost){
+    --leenkat-primary:#095580;
+    --leenkat-primary-hover:#064366;
+    --leenkat-primary-light:#EDF4F8;
+    --leenkat-primary-soft:#CDDFEB;
+    --leenkat-accent:#E5740F;
+    --leenkat-accent-hover:#A54706;
+    --leenkat-background:#F4F6F8;
+    --leenkat-surface:#FFFFFF;
+    --leenkat-silver:#9BABB5;
+    --leenkat-text:#243747;
+    --leenkat-muted:#526773;
+    --leenkat-border:#708797;
+    --leenkat-disabled-background:#E7EBEF;
+    --leenkat-disabled-text:#58656F;
+    --leenkat-focus:#095580;
+    /* WordPress components inherit these only inside Leenkat's own UI. */
+    --wp-admin-theme-color:var(--leenkat-primary);
+    --wp-admin-theme-color-darker-10:var(--leenkat-primary-hover);
+    --wp-admin-theme-color-darker-20:var(--leenkat-primary-hover);
+    --wp-components-color-accent:var(--leenkat-primary);
+    --wp-components-color-accent-darker-10:var(--leenkat-primary-hover);
+    --wp-components-color-accent-darker-20:var(--leenkat-primary-hover);
+}
+:where(.lkf-management,.lkf-global-settings,.lkf-tools){background-color:var(--leenkat-background)}
+.lkf-management .lkf-management-brand{background-color:var(--leenkat-background);border-top-color:var(--leenkat-accent)}
+.lkf-management .page-title-action{background-color:var(--leenkat-primary);border-color:var(--leenkat-primary);color:var(--leenkat-surface)}
+:where(.lkf-management,.lkf-global-settings,.lkf-tools) a:not(.submitdelete):not(.page-title-action){color:var(--leenkat-primary)}
+:where(.lkf-management,.lkf-global-settings,.lkf-tools) a:not(.submitdelete):not(.page-title-action):hover{color:var(--leenkat-primary-hover)}
+:where(.lkf-management,.lkf-global-settings,.lkf-tools) .button-primary{background-color:var(--leenkat-primary);border-color:var(--leenkat-primary);color:var(--leenkat-surface)}
+:where(.lkf-management,.lkf-global-settings,.lkf-tools) .button-primary:hover:not(:disabled){background-color:var(--leenkat-primary-hover);border-color:var(--leenkat-primary-hover);color:var(--leenkat-surface)}
+:where(.lkf-management,.lkf-global-settings,.lkf-tools) .button:not(.button-primary):not(.button-link-delete):not(.submitdelete){color:var(--leenkat-primary)}
+:where(.lkf-management,.lkf-global-settings,.lkf-tools) :is(input,select,textarea):not([type=color]):focus{border-color:var(--leenkat-primary);box-shadow:0 0 0 1px var(--leenkat-focus)}
+:where(.lkf-management,.lkf-global-settings,.lkf-tools) :is(a,button,input,select,textarea):focus-visible{outline:2px solid var(--leenkat-focus);outline-offset:2px}
+:where(.lkf-management,.lkf-global-settings,.lkf-tools) input{accent-color:var(--leenkat-primary)}
+.lkf-global-settings input[type=radio]:checked::before{background-color:var(--leenkat-primary)}
+.lkf-global-settings .lkf-settings-tabs a[aria-current=page]{color:var(--leenkat-primary)}
+.lkf-settings-brand{background-color:var(--leenkat-background)}
+.lkf-management .description,.lkf-global-settings .description{color:var(--leenkat-muted)}
+.lkf-management .lkf-form-picker label{color:var(--leenkat-muted)}
+.lkf-management .lkf-entry-icon:disabled{color:var(--leenkat-disabled-text)}
+#lkf-builder-root .lkf-builder{--muted:var(--leenkat-muted)}
+#lkf-builder-root .lkf-builder .lkf-drawer{background-color:var(--leenkat-primary-light)}
+#lkf-builder-root .lkf-builder .lkf-drawer-tabs button{background-color:var(--leenkat-primary-soft);color:var(--leenkat-muted)}
+#lkf-builder-root .lkf-builder .lkf-drawer-tabs button.is-active{background-color:var(--leenkat-primary-light);color:var(--leenkat-primary)}
+#lkf-builder-root .lkf-options-subtabs button.is-active{color:var(--leenkat-primary)}
+#lkf-builder-root .lkf-settings-nav button:not(.is-current):hover{background-color:var(--leenkat-primary-light);color:var(--leenkat-primary)}
+#lkf-builder-root .lkf-field-actions .components-button:not(.is-destructive){color:var(--leenkat-primary)}
+#lkf-builder-root .lkf-field-actions .components-button:not(.is-destructive):hover{background-color:var(--leenkat-primary-light)}
+#lkf-builder-root .lkf-builder .lkf-toolbar .components-button:not(.is-primary):not(:disabled){color:var(--leenkat-primary)}
+#lkf-builder-root .lkf-builder .lkf-toolbar .components-button:not(.is-primary):not(:disabled):hover{background-color:var(--leenkat-primary-light);border-color:var(--leenkat-primary)}
+#lkf-builder-root .lkf-builder .lkf-tools-toggle:hover{background-color:var(--leenkat-primary-light);color:var(--leenkat-primary)}
+#lkf-builder-root .lkf-options :is(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]),textarea,select){border-color:var(--leenkat-border)!important}
+#lkf-builder-root :is(.lkf-tools-menu,.components-form-token-field__suggestions-list) :is(button,a):hover{background-color:var(--leenkat-primary-light);color:var(--leenkat-primary)}
+#lkf-builder-root :is(.components-button.is-primary,.button-primary):not(.is-destructive):not(:disabled),
+:is(.lkf-delete-modal,.lkf-import-dialog,.lkf-template-modal,.lkf-smart-tags-modal) .components-button.is-primary:not(.is-destructive):not(:disabled){background-color:var(--leenkat-primary);border-color:var(--leenkat-primary);color:var(--leenkat-surface)}
+#lkf-builder-root :is(.components-button.is-primary,.button-primary):not(.is-destructive):not(:disabled):hover,
+:is(.lkf-delete-modal,.lkf-import-dialog,.lkf-template-modal,.lkf-smart-tags-modal) .components-button.is-primary:not(.is-destructive):not(:disabled):hover{background-color:var(--leenkat-primary-hover);border-color:var(--leenkat-primary-hover);color:var(--leenkat-surface)}
+#lkf-builder-root :focus-visible{outline-color:var(--leenkat-focus)}
+#lkf-builder-root .components-form-toggle:has(:focus-visible) .components-form-toggle__track{outline:2px solid var(--leenkat-focus);outline-offset:2px}
+#lkf-builder-root :is(.lkf-options-title span,.lkf-panel-hint,.components-base-control__help,.lkf-preview-description,.lkf-options-subtabs button:not(.is-active)){color:var(--leenkat-muted)}
+#lkf-builder-root :is(.components-button,button):disabled:not(.lkf-preview-submit):not(.lkf-icon-action),
+:where(.lkf-management,.lkf-global-settings,.lkf-tools) .button:disabled{background-color:var(--leenkat-disabled-background);border-color:var(--leenkat-silver);color:var(--leenkat-disabled-text);opacity:1}
+#lkf-builder-root .lkf-field-actions .lkf-icon-action:disabled{color:var(--leenkat-disabled-text)}
+/* Keep semantic red/green/amber declarations and all provider imagery unchanged. */

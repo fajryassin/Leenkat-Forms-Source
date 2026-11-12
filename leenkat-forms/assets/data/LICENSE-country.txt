@@ -1,0 +1,3 @@
+Country allocation data from https://iptoasn.com/ (Frank Denis).
+Public Domain Dedication and License, PDDL v1.0: https://opendatacommons.org/licenses/pddl/1-0/
+Local snapshot; no visitor IP is sent to that service. See country-source.json for date and hashes.

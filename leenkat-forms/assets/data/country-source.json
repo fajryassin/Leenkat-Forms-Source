@@ -1,0 +1,21 @@
+{
+    "source": "https://iptoasn.com/",
+    "license": "PDDL-1.0",
+    "downloaded_utc": "2026-10-19T20:34:17+00:00",
+    "files": {
+        "country-v4.dat": {
+            "ranges": 457633,
+            "bytes": 4576340,
+            "sha256": "b0065a40a60f8e9033bce5e6b06509457ae023ff698a2aed7d70ef5a215b1f17",
+            "source_sha256": "c15d98245407f5593e9415e71a9331f25954f3f0ad892f1615623ae2142a64b4",
+            "url": "https://iptoasn.com/data/ip2country-v4.tsv.gz"
+        },
+        "country-v6.dat": {
+            "ranges": 118846,
+            "bytes": 4040774,
+            "sha256": "8608a3ce6a21667b801da3c5f6cf9eba4d9586ac943b28b87fb3b4ced7c7712f",
+            "source_sha256": "774a96dc601de9d04f6536fa8efa2d01ceacdc58655a242c91108e8f34ca27f3",
+            "url": "https://iptoasn.com/data/ip2country-v6.tsv.gz"
+        }
+    }
+}

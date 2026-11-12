@@ -1,0 +1,67 @@
+# Private attachments
+
+New private attachments are stored as authenticated ciphertext in a site-specific
+subdirectory of `wp_upload_dir()`. PHP Sodium's XChaCha20-Poly1305 secretstream
+authenticates each chunk, the object identifier, and the end of the stream.
+Encrypted objects and new migration journals contain no plaintext attachment
+or entry data. Direct static access, if the server allows it, returns ciphertext.
+The WordPress endpoint still checks the administrator's capability and nonce or
+an expiring signed email token before it verifies and serves the original bytes.
+Files deliberately opted into the Media Library retain WordPress media behavior.
+
+PHP's temporary directory and any server aliases of it must be non-public.
+The plugin checks the configured WordPress root, uploads root and document root
+before using its private PHP temporary files. Decrypted data is staged there
+with owner-only permissions, removed when closed or when PHP ends the request,
+and is never staged under uploads. The plugin cannot discover every web-server
+alias. Keep system temporary directories and database exports out of every
+public virtual host. Sodium is required for new private writes and reads of
+encrypted objects. There is no fallback to storing a new attachment in plaintext.
+
+## Backup, relocation and rollback
+
+1. Pause form submissions, downloads, and delivery workers during a relocation.
+   Back up the database (including the encryption key option), uploads, all
+   legacy private files and journals, and the installed plugin. Keep database
+   and file backups separate from public directories, with restricted access.
+   Record a SHA-256 manifest of every private object and journal.
+2. Restore the database and copy the encrypted directory as a unit to the
+   destination WordPress uploads directory. The directory name and object names
+   must not change. Verify the copied manifest against the source. Do not
+   generate a replacement key: the original database key must be restored
+   unchanged. WordPress salts do not encrypt attachments; changing them does
+   invalidate old signed email links.
+3. Existing legacy private objects stay where they were. If the old location
+   cannot be retained on the destination, copy it to a verified non-public
+   directory, leave the source untouched, and configure
+   `LEENKAT_FORMS_LEGACY_STORAGE_DIR` to the destination absolute path. This
+   supersedes the old `LKF_PRIVATE_STORAGE_DIR` setting. Do not copy legacy
+   plaintext files into uploads. For old migration journals on a moved site,
+   `LEENKAT_FORMS_LEGACY_SITE_ROOT` may identify the exact former WordPress root
+   string (including the trailing separator); for old upload-path references
+   `LEENKAT_FORMS_LEGACY_UPLOADS_DIR` may identify the former uploads base.
+   Configure these only from the verified backup, not from request input.
+4. Before reopening, compare the manifests and test an old and a new attachment
+   through the authorized download paths. Check that anonymous or invalid
+   authorization cannot yield plaintext. Check a known signed link when salts
+   are retained. Existing legacy private objects are not automatically converted
+   to the new encryption format. Existing explicit legacy public-file migration
+   still requires verified backups and separate approval to remove any source.
+5. If verification fails, keep both copies. Restore the previous directory
+   configuration and the matching database and plugin backup. The submitted
+   version cannot read new encrypted files: do not downgrade it in place after
+   accepting new submissions. Retain a separate full backup of the newer database
+   and files before rollback, then reconcile post-cutover submissions in an
+   isolated copy so no entries are lost.
+
+The per-installation random key is in the database, not the uploads directory,
+and is not included in form exports. Losing it makes encrypted objects
+unrecoverable without a backup. An attacker with full database and uploads
+access is outside the direct-public-file threat model.
+
+Deactivation and upgrades do not delete stored files. Standard WordPress uninstall
+keeps data by default. If complete deletion was explicitly enabled, uninstall
+verifies ownership and file integrity before cleanup, and refuses unfamiliar
+files, invalid journals, or missing storage configuration. A previous interrupted
+uninstall must be completed using the original matching version/configuration or
+restored from a verified backup before retrying.

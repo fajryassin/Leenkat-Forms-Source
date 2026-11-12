@@ -1,0 +1,93 @@
+.lkf-form{max-width:42rem}.lkf-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:1rem}.lkf-full{grid-column:span 2}.lkf-half{grid-column:span 1}.lkf-field{margin-block:1rem}.lkf-field>label{display:block;margin-block-end:.35rem}.lkf-field input:not([type=checkbox]):not([type=radio]),.lkf-field textarea,.lkf-field select{box-sizing:border-box;width:100%;padding:.6rem;border:1px solid #777;border-radius:3px}.lkf-field fieldset{border:0;padding:0;margin:0}.lkf-field fieldset label{display:block;margin-block:.35rem}.lkf-form button{padding:.65rem 1.2rem;cursor:pointer}.lkf-form :focus-visible{outline:3px solid #2271b1;outline-offset:2px}.lkf-errors{border-inline-start:4px solid #b32d2e;padding:.75rem;margin-block:1rem}.lkf-hp{position:absolute!important;inline-size:1px;block-size:1px;overflow:hidden;clip-path:inset(50%)}@media(max-width:600px){.lkf-half{grid-column:span 2}}
+.lkf-field .lkf-name-parts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}.lkf-field .lkf-name-parts label{margin:0}.lkf-field .lkf-name-parts span{display:block;margin-top:.3rem;color:#667784;font-size:.9em}.lkf-field input[type=range]{padding:0;border:0}.lkf-field output{display:inline-block;margin-inline-start:.6rem}.lkf-field:has(input[name^="captcha_tokens["])>label{font-weight:600}@media(max-width:600px){.lkf-field .lkf-name-parts{grid-template-columns:1fr}}
+.lkf-form .lkf-field.lkf-size-small>input:not([type=checkbox]):not([type=radio]),.lkf-form .lkf-field.lkf-size-small>textarea,.lkf-form .lkf-field.lkf-size-small>select{width:30%}
+.lkf-form .lkf-field.lkf-size-medium>input:not([type=checkbox]):not([type=radio]),.lkf-form .lkf-field.lkf-size-medium>textarea,.lkf-form .lkf-field.lkf-size-medium>select{width:60%}
+.lkf-form .lkf-field.lkf-size-large>input:not([type=checkbox]):not([type=radio]),.lkf-form .lkf-field.lkf-size-large>textarea,.lkf-form .lkf-field.lkf-size-large>select{width:100%}
+.lkf-form .lkf-field.lkf-hide-label>label,.lkf-form .lkf-field.lkf-hide-label legend{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.lkf-form .lkf-description{margin:.4rem 0 0;color:#5d6d77;font-size:.9em;white-space:pre-line}
+@media(max-width:600px){.lkf-form .lkf-field>input:not([type=checkbox]):not([type=radio]),.lkf-form .lkf-field>textarea,.lkf-form .lkf-field>select{width:100%!important}}
+.lkf-form .lkf-name-parts.lkf-name-simple{grid-template-columns:minmax(0,1fr)}
+.lkf-form .lkf-name-parts.lkf-name-first_middle_last{grid-template-columns:minmax(0,2fr) minmax(0,1.1fr) minmax(0,2fr)}
+.lkf-form .lkf-size-small>.lkf-name-fieldset{width:25%}
+.lkf-form .lkf-size-medium>.lkf-name-fieldset{width:60%}
+.lkf-form .lkf-name-fieldset .lkf-visually-hidden{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:600px){.lkf-form .lkf-size-small>.lkf-name-fieldset,.lkf-form .lkf-size-medium>.lkf-name-fieldset{width:100%}.lkf-form .lkf-name-parts.lkf-name-first_middle_last{grid-template-columns:1fr}}
+.lkf-form .lkf-name-parts input{width:100%!important}
+.lkf-form .lkf-email-parts{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1rem}
+.lkf-form .lkf-choice-options{display:grid;gap:5px;align-items:start}
+.lkf-form .lkf-choice-options label{display:flex;align-items:center;gap:12px;margin:0;min-width:0}
+.lkf-form .lkf-choice-options input{flex:none;margin:0}
+.lkf-form .lkf-choice-layout-two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.lkf-form .lkf-choice-layout-three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.lkf-form .lkf-choice-layout-inline{display:flex;flex-wrap:wrap;gap:5px 20px}
+.lkf-form .lkf-choice-image{display:block;max-width:100%;width:120px;height:100px;object-fit:contain}
+.lkf-form .lkf-choice-icon{width:40px;height:40px;flex:none}
+.lkf-form .lkf-visual-choices label{flex-wrap:wrap;box-sizing:border-box;border:1px solid #ccc;padding:12px;border-radius:4px;cursor:pointer}
+.lkf-form .lkf-visual-choices label:has(>.lkf-choice-image){display:grid;grid-template-columns:16px minmax(0,1fr) 16px;gap:12px}
+.lkf-form .lkf-visual-choices label>.lkf-choice-image{grid-column:2;justify-self:center}
+.lkf-form .lkf-visual-choices label:has(>.lkf-choice-image)>span{grid-column:1/-1;min-width:0;text-align:center;overflow-wrap:anywhere}
+.lkf-form .lkf-visual-choices label:has(input:checked){border-color:#087e84;box-shadow:inset 0 0 0 1px #087e84}
+.lkf-form .lkf-disclaimer{box-sizing:border-box;max-height:120px;overflow:auto;white-space:pre-wrap;border:1px solid #ccc;padding:10px;font-size:14px;line-height:20px}
+.lkf-form .lkf-field output{display:block;margin:8px 0 0;font-size:14px}
+@media(max-width:600px){.lkf-form .lkf-choice-layout-two,.lkf-form .lkf-choice-layout-three{grid-template-columns:1fr}}
+.lkf-form .lkf-email-parts label{margin:0}
+.lkf-form .lkf-email-parts input{width:100%!important}
+.lkf-form .lkf-email-parts span{display:block;margin-top:.3rem;color:#667784;font-size:.9em}
+.lkf-form .lkf-email-fieldset .lkf-visually-hidden{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.lkf-form .lkf-size-small>.lkf-email-fieldset,.lkf-form .lkf-size-small>.iti,.lkf-form .lkf-size-small>.choices{width:30%}
+.lkf-form .lkf-size-medium>.lkf-email-fieldset,.lkf-form .lkf-size-medium>.iti,.lkf-form .lkf-size-medium>.choices{width:60%}
+.lkf-form .iti{width:100%}
+.lkf-form .iti__country-list{list-style:none;margin:0}
+.lkf-form .choices__inner{box-sizing:border-box;min-height:40px;border-radius:3px}
+.lkf-form .choices__input{max-width:100%;min-height:20px}
+.lkf-form .lkf-field .choices input{width:auto;border:0;padding:4px}
+@media(max-width:600px){.lkf-form .lkf-email-parts{grid-template-columns:1fr}.lkf-form .lkf-size-small>.lkf-email-fieldset,.lkf-form .lkf-size-medium>.lkf-email-fieldset,.lkf-form .lkf-size-small>.iti,.lkf-form .lkf-size-medium>.iti,.lkf-form .lkf-size-small>.choices,.lkf-form .lkf-size-medium>.choices{width:100%}}
+
+/* dev.29: image choices follow the media/card workflow. */
+
+.lkf-form .lkf-image-choices{gap:15px;align-items:start}
+
+.lkf-form .lkf-image-choices label{position:relative;display:block;box-sizing:border-box;max-width:100%;padding:20px;border:1px solid transparent;border-radius:4px;background:#fff;text-align:center;cursor:pointer}
+.lkf-form .lkf-image-choices.lkf-choice-layout-one{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+.lkf-form .lkf-image-choices.lkf-choice-layout-one label{flex:0 1 auto}
+.lkf-form .lkf-image-choices .lkf-choice-visual{position:relative;display:block;width:max-content;max-width:100%;margin:0 auto}
+.lkf-form .lkf-image-choices .lkf-choice-image{display:block;width:auto;max-width:min(250px,100%);height:auto;max-height:none;margin:0 auto;object-fit:contain}
+.lkf-form .lkf-image-choices label>span:last-child{display:block;min-width:0;margin-top:8px;font-size:14px;line-height:20px;text-align:center;overflow-wrap:anywhere}
+.lkf-form .lkf-image-choices:not(.lkf-image-style-none) input{position:absolute!important;width:1px!important;height:1px!important;min-height:1px!important;opacity:0!important;margin:0!important;padding:0!important;border:0!important}
+.lkf-form .lkf-image-choices label:focus-within{outline:2px solid #087e84;outline-offset:3px}
+.lkf-form .lkf-image-style-modern label:has(input:checked){border-color:#fff;box-shadow:0 2px 10px #0003}
+.lkf-form .lkf-image-style-modern label:has(input:checked)>span:last-child{font-weight:600}
+.lkf-form .lkf-image-style-modern label:has(input:checked) .lkf-choice-visual::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:32px;height:32px;border-radius:50%;background:#087e84;color:#fff;font:600 22px/32px sans-serif;text-align:center;box-shadow:0 2px 5px #0004}
+.lkf-form .lkf-image-style-classic label{padding:10px;border-color:#ccc;border-radius:0}
+.lkf-form .lkf-image-style-classic label:has(input:checked){outline:2px solid #087e84;outline-offset:-2px;box-shadow:none}
+.lkf-form .lkf-image-style-none label{display:grid;grid-template-columns:16px minmax(0,1fr);gap:8px 12px;padding:0;border:0;background:transparent;border-radius:0;box-shadow:none!important}
+.lkf-form .lkf-image-style-none .lkf-choice-visual{grid-column:1/-1}
+.lkf-form .lkf-image-style-none label>span:last-child{grid-column:1/-1;margin:0;padding-inline:20px;box-sizing:border-box}
+.lkf-form .lkf-image-style-none input{position:absolute;bottom:2px;inset-inline-start:0;opacity:1;width:16px;height:16px}
+
+/* Composite fields share the same proportions in the editor and published form. */
+.lkf-address-preview,.lkf-address-parts,.lkf-datetime-preview,.lkf-datetime-parts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 20px}
+.lkf-address-preview>label,.lkf-address-parts>label,.lkf-datetime-preview>label,.lkf-datetime-parts>label{display:flex;flex-direction:column;gap:7px;margin:0;min-width:0;font-weight:400}
+.lkf-address-wide{grid-column:1/-1}
+.lkf-address-preview label>span,.lkf-address-parts label>span,.lkf-datetime-preview label>span,.lkf-datetime-parts label>span{font-size:14px;color:#999;font-weight:400}
+.lkf-address-preview input,.lkf-address-preview select,.lkf-datetime-preview input,.lkf-address-parts input,.lkf-address-parts select,.lkf-datetime-parts input{width:100%;max-width:none!important}
+.lkf-upload-drop{position:relative;min-height:140px;border:1px dashed #ccc;background:#fafafa;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:20px;box-sizing:border-box;color:#777}
+.lkf-upload-drop>label{position:static;display:flex;flex-direction:column;align-items:center;gap:15px;font-weight:400;margin:0;cursor:pointer}
+.lkf-upload-drop input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.lkf-upload-drop:focus-within{outline:2px solid #00838b;outline-offset:2px}
+.lkf-upload-drop.is-dragover{border-color:#00838b;background:#edf9fa}
+.lkf-upload-status{font-size:14px;margin:8px 0 0;white-space:pre-wrap}
+.lkf-section-title{font-size:20px;line-height:1.4;margin:0;font-weight:600}
+.lkf-section-line{border:0;border-top:1px solid #ddd;margin:0}
+@media(max-width:500px){.lkf-address-preview,.lkf-address-parts,.lkf-datetime-preview,.lkf-datetime-parts{grid-template-columns:1fr}}
+
+.lkf-composite-fieldset{border:0;padding:0;margin:0;min-width:0}.lkf-form .lkf-composite-fieldset>legend{font-size:16px;font-weight:600;line-height:20px;padding:0;margin-bottom:15px;float:none;width:auto}.lkf-form .lkf-composite-fieldset{width:100%}.lkf-form .lkf-size-small>.lkf-composite-fieldset{max-width:25%}.lkf-form .lkf-size-medium>.lkf-composite-fieldset{max-width:60%}.lkf-form .lkf-type-file_upload>.lkf-composite-fieldset{max-width:100%}.lkf-form .flatpickr-input{box-sizing:border-box}.lkf-form .lkf-type-section_divider{border-top:1px solid #ddd;padding-top:24px}@media(max-width:600px){.lkf-form .lkf-size-small>.lkf-composite-fieldset,.lkf-form .lkf-size-medium>.lkf-composite-fieldset{max-width:100%}}
+
+.lkf-date-dropdowns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-width:0}.lkf-date-dropdowns label{display:flex;flex-direction:column;gap:7px;min-width:0}.lkf-date-dropdowns select{width:100%;min-width:0}.lkf-date-dropdowns label>span{font-size:14px;color:#999;font-weight:400}.lkf-datetime-parts>:only-child,.lkf-datetime-preview>:only-child{grid-column:1/-1}
+.lkf-form .lkf-composite-fieldset>legend{font:inherit}
+.lkf-upload-status{overflow-wrap:anywhere}
+
+.lkf-confirmation{padding:24px;background:#eff8f6;border:1px solid #bddbd3;border-radius:4px;overflow-wrap:anywhere}.lkf-confirmation:focus{outline:2px solid #087e84;outline-offset:3px}.lkf-entry-preview{margin-top:24px}.lkf-entry-preview table{width:100%;border-collapse:collapse}.lkf-entry-preview th,.lkf-entry-preview td{padding:12px;text-align:start;vertical-align:top;border-bottom:1px solid #d0dedb}.lkf-entry-preview h3{margin:0 0 12px}
+.lkf-service-captcha{margin:12px 0 20px;max-width:100%}
+.lkf-service-captcha [data-lkf-captcha-status]{margin:8px 0;color:#9a2828;font-size:14px}
+.lkf-service-captcha [data-lkf-captcha-status]:empty{display:none}

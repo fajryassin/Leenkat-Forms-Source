@@ -1,0 +1,22 @@
+{
+  "phone/.nvmrc": "./.node-version",
+  "phone/angular/src/intl-tel-input.ts": "../../src/js/intl-tel-input.ts",
+  "phone/angular/src/intl-tel-input/data.ts": "../../../src/js/intl-tel-input/data.ts",
+  "phone/angular/src/intl-tel-input/i18n": "../../../src/js/intl-tel-input/i18n/",
+  "phone/angular/src/intl-tel-input/intlTelInputWithUtils.ts": "../../../src/js/intl-tel-input/intlTelInputWithUtils.ts",
+  "phone/angular/src/intl-tel-input/utils.js": "../../../build/js/utils.js",
+  "phone/angular/src/modules": "../../src/js/modules",
+  "phone/react/src/intl-tel-input.ts": "../../src/js/intl-tel-input.ts",
+  "phone/react/src/intl-tel-input/data.ts": "../../../src/js/intl-tel-input/data.ts",
+  "phone/react/src/intl-tel-input/i18n": "../../../src/js/intl-tel-input/i18n",
+  "phone/react/src/intl-tel-input/intlTelInputWithUtils.ts": "../../../src/js/intl-tel-input/intlTelInputWithUtils.ts",
+  "phone/react/src/intl-tel-input/utils.js": "../../../build/js/utils.js",
+  "phone/react/src/modules": "../../src/js/modules",
+  "phone/src/js/intl-tel-input/utils.js": "../../../build/js/utils.js",
+  "phone/vue/src/intl-tel-input.ts": "../../src/js/intl-tel-input.ts",
+  "phone/vue/src/intl-tel-input/data.ts": "../../../src/js/intl-tel-input/data.ts",
+  "phone/vue/src/intl-tel-input/i18n": "../../../src/js/intl-tel-input/i18n",
+  "phone/vue/src/intl-tel-input/intlTelInputWithUtils.ts": "../../../src/js/intl-tel-input/intlTelInputWithUtils.ts",
+  "phone/vue/src/intl-tel-input/utils.js": "../../../build/js/utils.js",
+  "phone/vue/src/modules": "../../src/js/modules"
+}

@@ -1,0 +1,41 @@
+/* Functional visibility is retained in every styling mode. */
+.lkf-form [hidden],.lkf-confirmation [hidden]{display:none!important}
+.lkf-hp{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%)!important;pointer-events:none!important}
+.lkf-sr-only,.lkf-visually-hidden,.lkf-form .screen-reader-text{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(1px,1px,1px,1px)!important;white-space:nowrap!important}
+.lkf-errors,.lkf-confirmation,.lkf-entry-preview{overflow-wrap:anywhere}
+.lkf-form .lkf-errors:empty{display:none}
+.lkf-service-captcha [data-lkf-captcha-status]:empty{display:none}
+/* Paragraph size is functional in every styling mode; legacy fields stay Large. */
+.lkf-form .lkf-field.lkf-type-textarea>textarea{box-sizing:border-box;width:100%;max-width:100%;min-width:0;min-height:220px;resize:vertical}
+.lkf-form .lkf-field.lkf-type-textarea.lkf-size-small>textarea{width:25%;min-height:90px}
+.lkf-form .lkf-field.lkf-type-textarea.lkf-size-medium>textarea{width:50%;min-height:150px}
+.lkf-form .lkf-field.lkf-type-textarea.lkf-size-large>textarea{width:100%;min-height:220px}
+@media(max-width:600px){.lkf-form .lkf-field.lkf-type-textarea.lkf-size-small>textarea,.lkf-form .lkf-field.lkf-type-textarea.lkf-size-medium>textarea{width:100%}}
+
+/* Multi-step presentation never disables retained answers. Without JS all sections show. */
+.lkf-form [data-lkf-step]{min-inline-size:0;margin-block:1rem}
+.lkf-form [data-lkf-step-heading]:focus{outline:2px solid currentColor;outline-offset:4px}
+.lkf-form [data-lkf-progress]{display:block;inline-size:100%;max-inline-size:100%;block-size:1rem;margin-block:1rem}
+.lkf-form .lkf-step-list{display:flex;flex-wrap:wrap;gap:1rem 2rem;padding-inline-start:1.5rem;margin-block:1rem}
+.lkf-form .lkf-step-list [aria-current="step"]{font-weight:700;text-decoration:underline;text-underline-offset:.25em}
+.lkf-form .lkf-step-navigation{display:flex;flex-wrap:wrap;gap:1rem;margin-block:1rem}
+.lkf-form .lkf-step-navigation button{min-block-size:44px;max-inline-size:100%;overflow-wrap:anywhere}
+.lkf-form .lkf-step-navigation button{background:#087e84;border:1px solid #087e84;border-radius:4px;color:#fff;padding:10px 16px;font:inherit;line-height:1.4;cursor:pointer}
+.lkf-form .lkf-step-navigation [data-lkf-previous]{background:#fff;color:#087e84}
+.lkf-form .lkf-step-navigation button:hover:not(:disabled){background:#06676c;border-color:#06676c;color:#fff}
+.lkf-form .lkf-step-navigation button:disabled{background:#edf4f4;border-color:#bacfd0;color:#687f80;opacity:1;cursor:default}
+.lkf-form .lkf-step-navigation button:focus-visible{outline:2px solid #087e84;outline-offset:3px}
+.lkf-form .lkf-step-status{overflow-wrap:anywhere}
+/* Success belongs to the submitted form and remains outside its controls. */
+.lkf-form+.lkf-confirmation{box-sizing:border-box;max-inline-size:100%;margin-block:1rem 2rem;padding:1rem 1.25rem;border:1px solid #087e84;border-inline-start-width:4px;border-radius:4px;background:#eff9f8;color:#173c3e}
+.lkf-confirmation:focus-visible{outline:2px solid #087e84;outline-offset:3px}
+.lkf-confirmation .lkf-entry-preview{max-inline-size:100%;overflow-x:auto}
+.lkf-receipt-page{margin:0;background:#f4f7f7;color:#173c3e;font-family:system-ui,sans-serif}
+.lkf-receipt-page .lkf-receipt{box-sizing:border-box;max-inline-size:52rem;margin:2rem auto;padding:1.25rem;background:#fff;border-block-start:4px solid #087e84;border-radius:4px;overflow-wrap:anywhere}
+.lkf-form .lkf-field-errors{grid-column:1/-1;max-inline-size:100%;margin-block:.5rem 0}
+.lkf-form .lkf-field-error{margin:.25rem 0;color:#b42318;font-size:.9em;line-height:1.5;overflow-wrap:anywhere;text-align:start}
+.lkf-form input[data-lkf-invalid],.lkf-form select[data-lkf-invalid],.lkf-form textarea[data-lkf-invalid],.lkf-form .lkf-has-error .choices__inner{border-color:#b42318!important;box-shadow:0 0 0 1px #b42318}
+.lkf-form [data-lkf-invalid]:focus-visible{outline:2px solid #b42318;outline-offset:2px}
+
+.lkf-form .lkf-has-error .lkf-upload-drop{border-color:#b42318!important;box-shadow:0 0 0 1px #b42318}
+

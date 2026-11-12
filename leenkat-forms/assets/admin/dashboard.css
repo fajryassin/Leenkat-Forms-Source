@@ -1,0 +1,18 @@
+/* Landing-page presentation only. Reuse Settings header and official admin tokens. */
+.lkf-dashboard{padding-bottom:24px}
+.lkf-dashboard .lkf-settings-brand{border-bottom:1px solid var(--leenkat-silver)}
+.lkf-dashboard .lkf-dashboard-subtitle{margin:24px 0;color:var(--leenkat-muted)}
+.lkf-dashboard-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;max-width:1100px}
+.lkf-dashboard .lkf-dashboard-card{position:relative;display:block;box-sizing:border-box;min-width:0;padding:28px 28px 28px 76px;border:1px solid var(--leenkat-silver);border-radius:4px;background:var(--leenkat-surface);color:var(--leenkat-primary);text-decoration:none;overflow-wrap:anywhere;transition:background-color .15s,border-color .15s}
+.lkf-dashboard-card>.dashicons{position:absolute;inset-inline-start:28px;top:29px;font-size:28px;width:28px;height:28px;color:var(--leenkat-primary)}
+.lkf-dashboard .lkf-dashboard-card h2{margin:0 0 10px;line-height:1.4;color:var(--leenkat-primary)}
+.lkf-dashboard .lkf-dashboard-card p{margin:0;padding-inline-end:22px;color:var(--leenkat-muted)}
+.lkf-dashboard .lkf-dashboard-card:hover{background:var(--leenkat-primary-light);border-color:var(--leenkat-primary)}
+.lkf-dashboard .lkf-dashboard-card:focus-visible{outline:3px solid var(--leenkat-focus);outline-offset:3px;border-color:var(--leenkat-primary)}
+.lkf-dashboard-arrow{position:absolute;inset-inline-end:24px;bottom:28px;color:var(--leenkat-primary);font-size:22px}
+.lkf-dashboard-footer{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;max-width:1100px;margin-top:32px;padding-top:18px;border-top:2px solid var(--leenkat-accent);color:var(--leenkat-muted)}
+.lkf-dashboard-footer p{margin:0}
+.rtl .lkf-dashboard .lkf-dashboard-card{padding-inline:76px 28px}
+.rtl .lkf-dashboard-arrow{transform:scaleX(-1)}
+@media(max-width:600px){.lkf-dashboard-cards{grid-template-columns:minmax(0,1fr);gap:16px}.lkf-dashboard .lkf-dashboard-card{padding:22px 22px 22px 64px}.lkf-dashboard-card>.dashicons{inset-inline-start:22px;top:23px}.rtl .lkf-dashboard .lkf-dashboard-card{padding-inline:64px 22px}.lkf-dashboard-arrow{inset-inline-end:20px;bottom:20px}}
+@media(prefers-reduced-motion:reduce){.lkf-dashboard .lkf-dashboard-card{transition:none}}

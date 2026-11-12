@@ -1,0 +1,6 @@
+The custom-captcha.svg, recaptcha.svg, hcaptcha.svg, cloudflare.svg and akismet.svg
+icons are from the user-supplied WPForms 2.0.2.2 package, assets/images/anti-spam/.
+WPForms is distributed under GPLv2 or later. Original copyright and third-party
+service marks belong to their respective owners. Source: https://wordpress.org/plugins/wpforms-lite/
+License: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+none.svg is part of Leenkat Forms.
