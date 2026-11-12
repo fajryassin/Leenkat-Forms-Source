@@ -25,4 +25,5 @@ See the companion's COUNTRY-PROVENANCE.md for the routing policy.
 For notices and license terms see COPYING, licenses/, the component LICENSE
 files, and assets/vendor/THIRD-PARTY-NOTICES.md.
 
-Source companion publication is pending approval.
+Public corresponding source: https://github.com/fajryassin/Leenkat-Forms-Source
+Build guide: https://github.com/fajryassin/Leenkat-Forms-Source/blob/main/BUILD.md
