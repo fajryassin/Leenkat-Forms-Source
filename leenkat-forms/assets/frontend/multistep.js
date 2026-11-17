@@ -34,7 +34,7 @@
             if(focus)focusHeading();
         }
         function firstInvalid(root){return Array.from(root.querySelectorAll('input,select,textarea')).find(input=>!input.disabled && input.willValidate && !input.checkValidity());}
-        const errors=typeof window==='undefined'?null:window.lkfValidation;
+        const errors=typeof window==='undefined'?null:window.leenfoValidation;
         function report(input){if(!input)return true;const panel=input.closest('[data-lkf-step]');if(panel){active=panel;refresh();}if(errors)errors.focus(input);else{input.focus();input.reportValidity();}return false;}
         function advance(){validate(form);const invalid=active && (errors?errors.validate(form,active,false):firstInvalid(active));if(invalid)return report(invalid);const index=available.indexOf(active);if(index<available.length-1){active=available[index+1];refresh(true);}return true;}
         next.addEventListener('click',advance);

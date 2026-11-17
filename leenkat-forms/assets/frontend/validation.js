@@ -1,7 +1,7 @@
 (function(){
     'use strict';
     const __ = typeof window !== 'undefined' && window.wp?.i18n?.__ ? window.wp.i18n.__ : value => value;
-    if(window.lkfValidation)return;
+    if(window.leenfoValidation)return;
     const states=new WeakMap();
     const defaults={required:__("This field is required.", 'leenkat-forms'),invalid:__("Please enter a valid value.", 'leenkat-forms'),email:__("Please enter a valid email address.", 'leenkat-forms'),phone:__("Please enter a valid phone number.", 'leenkat-forms'),url:__("Please enter a valid URL.", 'leenkat-forms'),number:__("Please enter a valid number.", 'leenkat-forms'),choice:__("Please select an option.", 'leenkat-forms'),checkbox:__("Please check this box.", 'leenkat-forms'),choices:__("Please select at least one option.", 'leenkat-forms'),choice_limit:__("Please select no more than %d options.", 'leenkat-forms'),pattern:__("Please enter a value in the requested format.", 'leenkat-forms'),min:__("Please enter a value greater than or equal to %s.", 'leenkat-forms'),max:__("Please enter a value less than or equal to %s.", 'leenkat-forms'),unicode:__("Please enter valid Unicode text.", 'leenkat-forms'),characters:__("Please use no more than %d characters.", 'leenkat-forms'),words:__("Please use no more than %d words.", 'leenkat-forms'),bytes:__("This value exceeds the text byte-size limit.", 'leenkat-forms'),date:__("Please select a valid date within the allowed days.", 'leenkat-forms'),file_count:__("You can upload a maximum of %d file(s).", 'leenkat-forms'),file_size:__("This file exceeds the maximum size of %s.", 'leenkat-forms'),file_type:__("This file extension is not allowed. Allowed extensions: %s.", 'leenkat-forms'),email_match:__("Email addresses do not match.", 'leenkat-forms'),email_filter:__("This email address is not allowed.", 'leenkat-forms'),summary:__("Please correct the highlighted fields.", 'leenkat-forms')};
     function json(value){try{return JSON.parse(value||'{}');}catch{return {};}}
@@ -102,6 +102,6 @@
         const map={};for(const field of fields(form))if(field.dataset.lkfServerErrors)map[field.dataset.lkfFieldId]=json(field.dataset.lkfServerErrors);
         if(Object.keys(map).length)server(form,map);
     }
-    window.lkfValidation={text,validate,refresh,server,hydrate,focus};
+    window.leenfoValidation={text,validate,refresh,server,hydrate,focus};
 })();
 

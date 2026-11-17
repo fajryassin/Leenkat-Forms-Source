@@ -1,7 +1,7 @@
 (function(){
     'use strict';
     const __ = typeof window !== 'undefined' && window.wp?.i18n?.__ ? window.wp.i18n.__ : value => value;
-    if(window.lkfConfirmation)return;
+    if(window.leenfoConfirmation)return;
     const presented=new WeakSet();
     function present(box){
         if(presented.has(box))return;
@@ -33,7 +33,7 @@
         }else box.textContent=result.message || __("Thank you. Your response was submitted.", 'leenkat-forms');
         form.insertAdjacentElement('afterend',box);present(box);
     }
-    window.lkfConfirmation={show};
+    window.leenfoConfirmation={show};
     const start=()=>{for(const box of document.querySelectorAll('[data-lkf-confirmation]'))present(box);};
     if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
 })();

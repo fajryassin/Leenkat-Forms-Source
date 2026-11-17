@@ -8,8 +8,8 @@
         form.addEventListener('input',event=>{if(!event.target.closest('[data-lkf-saved-preview]')){dirty=true;update();}});form.addEventListener('change',update);update();
         form.querySelector('[data-lkf-test-captcha]')?.addEventListener('click',async event=>{
             const button=event.currentTarget,result=form.querySelector('[data-lkf-preview-result]');button.disabled=true;result.textContent='';
-            try{if(!window.lkfCaptcha)throw new Error(__("CAPTCHA is unavailable. Reload this page and try again.", 'leenkat-forms'));const token=await window.lkfCaptcha.prepare(preview);const response=await fetch(button.dataset.url,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-WP-Nonce':button.dataset.nonce},body:JSON.stringify({token})});const data=await response.json();if(!response.ok)throw new Error(data.message || __("Verification failed.", 'leenkat-forms'));result.textContent=data.message;result.dataset.error='false';}
-            catch(error){result.textContent=error.message;result.dataset.error='true';}finally{window.lkfCaptcha?.reset(preview);button.disabled=false;}
+            try{if(!window.leenfoCaptcha)throw new Error(__("CAPTCHA is unavailable. Reload this page and try again.", 'leenkat-forms'));const token=await window.leenfoCaptcha.prepare(preview);const response=await fetch(button.dataset.url,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-WP-Nonce':button.dataset.nonce},body:JSON.stringify({token})});const data=await response.json();if(!response.ok)throw new Error(data.message || __("Verification failed.", 'leenkat-forms'));result.textContent=data.message;result.dataset.error='false';}
+            catch(error){result.textContent=error.message;result.dataset.error='true';}finally{window.leenfoCaptcha?.reset(preview);button.disabled=false;}
         });
     });
 })();

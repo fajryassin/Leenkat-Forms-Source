@@ -3,7 +3,7 @@
     const __ = typeof window !== 'undefined' && window.wp?.i18n?.__ ? window.wp.i18n.__ : value => value;
     document.addEventListener('DOMContentLoaded',()=>{
         const form=document.querySelector('[data-lkf-site-settings]');if(!form)return;
-        const section=form.dataset.lkfSiteSettings,config=window.lkfSiteSettings || {},dialog=document.querySelector('[data-lkf-email-dialog]');let previews=config.previews || {},dirty=false,busy=false,timer=null,sequence=0,controller=null,showFormattingError=false;
+        const section=form.dataset.lkfSiteSettings,config=window.leenfoSiteSettings || {},dialog=document.querySelector('[data-lkf-email-dialog]');let previews=config.previews || {},dirty=false,busy=false,timer=null,sequence=0,controller=null,showFormattingError=false;
         const selectedTemplate=()=>form.querySelector('[name="email[template]"]:checked')?.value || 'default';
         const appearance=()=>form.querySelector('[name=appearance]:checked')?.value || 'light';
         const status=text=>{const el=form.querySelector('[data-lkf-preview-status]');if(el)el.textContent=text;};
@@ -34,7 +34,7 @@
         form.addEventListener('submit',async event=>{
             event.preventDefault();if(busy)return;if(!form.checkValidity()){const invalid=form.querySelector(':invalid'),panel=invalid?.closest('[data-lkf-appearance]');if(panel){form.querySelector('[name=appearance][value='+panel.dataset.lkfAppearance+']').checked=true;showFormattingError=true;update();}form.reportValidity();return;}
             busy=true;const button=form.querySelector('[type=submit]'),progress=form.querySelector('[data-lkf-save-progress]');button.disabled=true;progress.textContent=__("Saving…", 'leenkat-forms');
-            try{const body=new FormData(form);body.set('lkf_json','1');const response=await fetch(form.getAttribute('action'),{method:'POST',credentials:'same-origin',body});let data;try{data=await response.json();}catch{throw new Error(__("Settings could not be saved. Reload this page if your session has expired.", 'leenkat-forms'));}if(!response.ok)throw new Error(data.message || __("Settings could not be saved.", 'leenkat-forms'));form.elements.namedItem('revision').value=data.revision;dirty=false;showNotice(data.message);if(section==='email')await refreshPreview();}
+            try{const body=new FormData(form);body.set('leenfo_json','1');const response=await fetch(form.getAttribute('action'),{method:'POST',credentials:'same-origin',body});let data;try{data=await response.json();}catch{throw new Error(__("Settings could not be saved. Reload this page if your session has expired.", 'leenkat-forms'));}if(!response.ok)throw new Error(data.message || __("Settings could not be saved.", 'leenkat-forms'));form.elements.namedItem('revision').value=data.revision;dirty=false;showNotice(data.message);if(section==='email')await refreshPreview();}
             catch(error){showNotice(error.message,true);}finally{busy=false;button.disabled=false;progress.textContent='';}
         });
         window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});

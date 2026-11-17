@@ -145,8 +145,8 @@
             templateModal && templateGallery()
         );
     }
-    window.lkfNotificationsEditor=Editor;
-    window.lkfNotificationsModel={defaults,normalize};
+    window.leenfoNotificationsEditor=Editor;
+    window.leenfoNotificationsModel={defaults,normalize};
 })(window.wp.element,window.wp.components,window.wp.i18n);
 
 

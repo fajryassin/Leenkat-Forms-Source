@@ -12,6 +12,14 @@ Build WordPress forms with conditional logic, multi-step pages, entry management
 
 == Description ==
 
+= Source code and build instructions =
+
+The first-party source is included in this plugin. The pinned third-party build inputs, license notices and build tools are available at https://github.com/fajryassin/Leenkat-Forms-Source.
+
+Build guide: https://github.com/fajryassin/Leenkat-Forms-Source/blob/ee48bfe1dd1d9cd39d3eddbb450eb0c16994a984/BUILD.md
+Country-data provenance: https://github.com/fajryassin/Leenkat-Forms-Source/blob/ee48bfe1dd1d9cd39d3eddbb450eb0c16994a984/COUNTRY-PROVENANCE.md
+
+
 Leenkat Forms is a free WordPress form builder for creating and managing forms with a visual drag-and-drop editor. Build contact and other data-collection forms, configure field validation and conditional logic, and publish forms using supported WordPress editors or shortcodes.
 
 Features include:
@@ -33,7 +41,7 @@ Leenkat Forms does not currently import forms directly from other form-builder p
 
 Requires PHP 8.3 or newer and WordPress 7.1 or newer. The tested environments include local WordPress with MySQL and Linux hosting with Apache and MariaDB. Other server, database, cache, and multisite configurations have not been fully verified; multisite is not supported by this release.
 
-Private file uploads require the PHP Sodium and Fileinfo extensions, a writable WordPress uploads directory, and an operating-system PHP temporary directory outside all public web roots. New private files are authenticated and encrypted before they are written to WordPress uploads. No Apache or Nginx rule is required to protect plaintext. A direct static request may return ciphertext; use the plugin's authorized download routes to retrieve the file. Only files explicitly sent to the WordPress Media Library follow its public media behavior.
+Private file uploads require PHP Sodium and Fileinfo and a writable WordPress uploads directory. Files attached to stored entries appear as private Media Library records. New files are authenticated and encrypted as they are written to per-form uploads directories. A direct static request may return ciphertext. Authorized WordPress download routes return the original file after verification. Older public Media Library items keep their original visibility.
 
 Back up the WordPress database (which contains the private storage key) and uploads together; protect database backups separately from the public web tree. The encryption key must be restored unchanged when moving the site. Existing private objects and migration records remain in their original non-public storage; see PRIVATE-STORAGE.txt before relocating or rolling back an installation. There is no automatic plaintext fallback or attachment relocation. Confirm that the database tables support transactions (InnoDB).
 
@@ -58,7 +66,7 @@ Site administrators are responsible for informing visitors about enabled provide
 
 == Installation ==
 
-1. Confirm that your site meets the WordPress and PHP requirements and supports protected, writable private storage outside public web roots.
+1. Confirm the host meets the WordPress/PHP requirements, has Sodium and Fileinfo, and supports writable WordPress uploads for encrypted attachments.
 2. Install and activate Leenkat Forms through the WordPress Plugins screen.
 3. Open Leenkat Forms, create a form, and configure its fields, notifications, confirmations, and optional spam protection.
 4. Publish the form and embed it using the provided shortcode or a supported editor integration.
@@ -77,7 +85,7 @@ Yes. Use Page Break fields to create multiple steps and configure the available 
 
 = Are uploaded files publicly accessible? =
 
-The plugin requires protected storage outside public web roots and provides controlled downloads. Email download links are time-limited bearer links; anyone with a valid unexpired link may be able to access its authorized file, so handle such links carefully.
+New private attachments are stored as authenticated ciphertext under WordPress uploads and have no public plaintext file or thumbnail. WordPress can show the private Media Library record to authorized users. Downloads verify integrity in memory after checking authorization. Legacy attachments remain at their original locations. A valid unexpired signed email link authorizes the associated file, so handle those links carefully.
 
 = Can I use forms without JavaScript? =
 
@@ -93,7 +101,7 @@ Multisite is not supported by this release.
 
 = What happens to entries when I uninstall the plugin? =
 
-Data is retained by default. An explicit administrator setting controls destructive deletion on uninstall. External email copies, Media Library assets, and backups have separate retention behavior.
+Data is retained by default. An explicit administrator setting controls destructive deletion on uninstall. Opt-in deletion covers plugin-owned private Media Library records and verified private files. Older public Media Library items, external email copies, and independent backups have separate retention behavior.
 
 = Can I import forms from WPForms or other form plugins? =
 

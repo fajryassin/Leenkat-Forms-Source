@@ -25,5 +25,10 @@ See the companion's COUNTRY-PROVENANCE.md for the routing policy.
 For notices and license terms see COPYING, licenses/, the component LICENSE
 files, and assets/vendor/THIRD-PARTY-NOTICES.md.
 
-Public corresponding source: https://github.com/fajryassin/Leenkat-Forms-Source
-Build guide: https://github.com/fajryassin/Leenkat-Forms-Source/blob/main/BUILD.md
+Public third-party build inputs and instructions:
+https://github.com/fajryassin/Leenkat-Forms-Source
+
+Published build-input revision: https://github.com/fajryassin/Leenkat-Forms-Source/tree/ee48bfe1dd1d9cd39d3eddbb450eb0c16994a984
+Build guide: https://github.com/fajryassin/Leenkat-Forms-Source/blob/ee48bfe1dd1d9cd39d3eddbb450eb0c16994a984/BUILD.md
+Country provenance: https://github.com/fajryassin/Leenkat-Forms-Source/blob/ee48bfe1dd1d9cd39d3eddbb450eb0c16994a984/COUNTRY-PROVENANCE.md
+

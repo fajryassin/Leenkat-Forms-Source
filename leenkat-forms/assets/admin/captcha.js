@@ -27,5 +27,5 @@
                 ].map(([key,label,logo,description])=>e('article',{key,className:'lkf-security-card'},e('img',{className:'lkf-security-card-logo',src:(config.securityIconsUrl||'')+logo,width:70,height:70,alt:'','aria-hidden':true}),e(embedded?'h5':'h4',{},label),e('p',{},__(description,'leenkat-forms')),e('a',{href:config.captchaSettingsUrl+'&provider='+key,target:'_blank',rel:'noopener noreferrer'},__('Global settings →','leenkat-forms'))))))
         );
     }
-    window.lkfCaptchaSettings={state};window.lkfCaptchaSettingsEditor=Editor;
+    window.leenfoCaptchaSettings={state};window.leenfoCaptchaSettingsEditor=Editor;
 })(window.wp.element,window.wp.components,window.wp.i18n);

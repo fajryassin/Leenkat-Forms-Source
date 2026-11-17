@@ -1,14 +1,14 @@
 (function (blocks, element, components, blockEditor, serverSideRender, i18n) {
     const el = element.createElement;
     const __ = i18n.__;
-    const logo = el('img', { src: window.lkfBlockLogo, alt: '', width: 24, height: 24, style: { objectFit: 'contain' } });
+    const logo = el('img', { src: window.leenfoBlockLogo, alt: '', width: 24, height: 24, style: { objectFit: 'contain' } });
     blocks.registerBlockType('leenkat-forms/form', {
         apiVersion: 3,
         title: __('Leenkat Forms', 'leenkat-forms'),
         icon: logo, category: 'widgets',
         attributes: { formId: { type: 'integer', default: 0 } },
         edit: function (props) {
-            const choices = Object.entries(window.lkfBlockForms || {}).map(([value, label]) => ({ value: Number(value), label }));
+            const choices = Object.entries(window.leenfoBlockForms || {}).map(([value, label]) => ({ value: Number(value), label }));
             const options = [{ value: 0, label: __('Select a form', 'leenkat-forms') }, ...choices];
             const select = () => el(components.SelectControl, {
                 label: __('Form', 'leenkat-forms'), value: props.attributes.formId,

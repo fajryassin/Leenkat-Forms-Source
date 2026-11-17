@@ -1,22 +1,26 @@
 # Private attachments
 
-New private attachments are stored as authenticated ciphertext in a site-specific
-subdirectory of `wp_upload_dir()`. PHP Sodium's XChaCha20-Poly1305 secretstream
-authenticates each chunk, the object identifier, and the end of the stream.
-Encrypted objects and new migration journals contain no plaintext attachment
-or entry data. Direct static access, if the server allows it, returns ciphertext.
-The WordPress endpoint still checks the administrator's capability and nonce or
-an expiring signed email token before it verifies and serves the original bytes.
-Files deliberately opted into the Media Library retain WordPress media behavior.
+Stored entry uploads are represented as private WordPress Media Library
+attachments. The image editor, previews and thumbnail generation are unavailable
+for these records. The Media Library file URL is a permission-checked download
+link when the current user can access the linked entry.
 
-PHP's temporary directory and any server aliases of it must be non-public.
-The plugin checks the configured WordPress root, uploads root and document root
-before using its private PHP temporary files. Decrypted data is staged there
-with owner-only permissions, removed when closed or when PHP ends the request,
-and is never staged under uploads. The plugin cannot discover every web-server
-alias. Keep system temporary directories and database exports out of every
-public virtual host. Sodium is required for new private writes and reads of
-encrypted objects. There is no fallback to storing a new attachment in plaintext.
+The original upload is encrypted as it is written to
+`wp_upload_dir()/leenkat-forms/{form_id}/`. PHP Sodium's XChaCha20-Poly1305
+secretstream authenticates each chunk, object identifier and stream ending.
+A server that serves the object directly can only return authenticated
+ciphertext. WordPress administrators need the entry capability and a download
+nonce. Email links use a signed, scoped token with a seven-day expiration.
+Downloads and the default WordPress mailer read the verified bytes in memory.
+The plugin does not create decrypted files or thumbnail files on disk.
+Sodium is required. There is no plaintext fallback.
+
+For older private attachments, Attachment Security can index a verified
+batch into Media without moving the original or changing entry/file IDs.
+Previously public Media Library items keep their historical visibility.
+Content is not persisted as Media when the form's entry storage is disabled.
+Plugins that bypass WordPress's PHPMailer pipeline may require separate
+compatibility verification for notifications with attachments.
 
 ## Backup, relocation and rollback
 
@@ -25,7 +29,7 @@ encrypted objects. There is no fallback to storing a new attachment in plaintext
    legacy private files and journals, and the installed plugin. Keep database
    and file backups separate from public directories, with restricted access.
    Record a SHA-256 manifest of every private object and journal.
-2. Restore the database and copy the encrypted directory as a unit to the
+2. Restore the database and copy the per-form encrypted directories and any historical encrypted directory as units to the
    destination WordPress uploads directory. The directory name and object names
    must not change. Verify the copied manifest against the source. Do not
    generate a replacement key: the original database key must be restored
@@ -48,8 +52,7 @@ encrypted objects. There is no fallback to storing a new attachment in plaintext
    to the new encryption format. Existing explicit legacy public-file migration
    still requires verified backups and separate approval to remove any source.
 5. If verification fails, keep both copies. Restore the previous directory
-   configuration and the matching database and plugin backup. The submitted
-   version cannot read new encrypted files: do not downgrade it in place after
+   configuration and the matching database and plugin backup. Earlier builds cannot resolve the new per-form layout: do not downgrade it in place after
    accepting new submissions. Retain a separate full backup of the newer database
    and files before rollback, then reconcile post-cutover submissions in an
    isolated copy so no entries are lost.

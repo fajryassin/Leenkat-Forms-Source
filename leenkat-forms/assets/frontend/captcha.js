@@ -58,7 +58,7 @@
     }
     function reset(root){const container=find(root),state=container&&states.get(container);if(!state)return;state.input.value='';if(state.api&&state.id!==null){try{state.api.reset(state.id);}catch{state.ready=null;}}}
     function init(root=document){for(const container of root.querySelectorAll('[data-lkf-captcha]'))ensure(container).catch(()=>{});}
-    window.lkfCaptcha={prepare,reset,init};
+    window.leenfoCaptcha={prepare,reset,init};
     document.addEventListener('DOMContentLoaded',()=>init());
     window.addEventListener('pageshow',()=>{for(const container of document.querySelectorAll('[data-lkf-captcha]'))reset(container);});
 })();

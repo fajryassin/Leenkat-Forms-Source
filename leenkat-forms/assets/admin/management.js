@@ -19,12 +19,12 @@
     root.addEventListener('submit', function (event) {
         const button = event.submitter;
         const form = event.target;
-        let operation = button && button.name === 'lkf_row_action' ? button.value.split(':')[0] : '';
-        if (!operation && button && button.name === 'lkf_apply') {
+        let operation = button && button.name === 'leenfo_row_action' ? button.value.split(':')[0] : '';
+        if (!operation && button && button.name === 'leenfo_apply') {
             const select = form.querySelector('[name="' + (button.value === 'bottom' ? 'operation2' : 'operation') + '"]');
             operation = select ? select.value : '';
         }
         if (!operation && button && button.name === 'operation') operation = button.value;
-        if (operation === 'delete' && !window.confirm(window.lkfManagement.deleteWarning)) event.preventDefault();
+        if (operation === 'delete' && !window.confirm(window.leenfoManagement.deleteWarning)) event.preventDefault();
     });
 }());

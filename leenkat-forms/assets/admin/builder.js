@@ -4,8 +4,8 @@
     const { useState, useEffect, useRef } = element;
     const { Button, TextControl, TextareaControl, SelectControl, ToggleControl, FormTokenField, Tooltip, Notice, Spinner, Modal } = components;
     const __ = i18n.__;
-    const config = window.lkfBuilderConfig;
-    const model = window.lkfBuilderModel;
+    const config = window.leenfoBuilderConfig;
+    const model = window.leenfoBuilderModel;
     const standardTypes = [
         ['text', __('Single Line Text', 'leenkat-forms')], ['textarea', __('Paragraph Text', 'leenkat-forms')],
         ['name', __('Name', 'leenkat-forms')], ['email', __('Email', 'leenkat-forms')],
@@ -29,8 +29,8 @@
         ? e(element.Fragment, {}, e('path', { d: 'M3 6h18M3 12h18M3 18h18' }), e('circle', { cx: 8, cy: 6, r: 2, fill: 'currentColor' }), e('circle', { cx: 16, cy: 12, r: 2, fill: 'currentColor' }), e('circle', { cx: 9, cy: 18, r: 2, fill: 'currentColor' }))
         : e(element.Fragment, {}, e('rect', { x: 3, y: 5, width: 18, height: 14, rx: 1 }), e('path', { d: 'M7 9h1M7 12h1M7 15h1M11 9h6M11 12h6M11 15h6' })));
     const fresh = () => {
-        const definition = { schema_version: 1, next_field_number: 1, title: __('Untitled Form', 'leenkat-forms'), fields: [], settings: { general:{ajax:true,disable_ip:false},...(window.lkfSecurityModel?{security:window.lkfSecurityModel.defaults()}:{}), confirmation: { message: __('Thank you. Your response was submitted.', 'leenkat-forms') } } };
-        definition.settings.notifications = { enabled: true, items: [window.lkfNotificationsModel.defaults(definition)] };
+        const definition = { schema_version: 1, next_field_number: 1, title: __('Untitled Form', 'leenkat-forms'), fields: [], settings: { general:{ajax:true,disable_ip:false},...(window.leenfoSecurityModel?{security:window.leenfoSecurityModel.defaults()}:{}), confirmation: { message: __('Thank you. Your response was submitted.', 'leenkat-forms') } } };
+        definition.settings.notifications = { enabled: true, items: [window.leenfoNotificationsModel.defaults(definition)] };
         return definition;
     };
     const agreementText = __('I consent to having this website store my submitted information so they can respond to my inquiry.', 'leenkat-forms');
@@ -87,7 +87,7 @@
         'Submit Button CSS Class': __('CSS class names for the submit button, separated by spaces.','leenkat-forms'),
         'Enable Prefill by URL': __('Use ?lkfFORMID_FIELDID=value, e.g. ?lkf12_f_0001=Hello. Add _first, _last, _date or another part name for composite fields; separate multiple choices with |. Consent, CAPTCHA, uploads and read-only fields cannot be prefilled.','leenkat-forms'),
         'Enable AJAX form submission': __('Submit without reloading the page. When disabled, the form uses a normal POST and returns to the form page.','leenkat-forms'),
-        'Disable storing entry information in WordPress': __('Process notifications without saving answers or searchable entry values. Notifications are sent immediately without a persistent retry queue. Uploaded files are attached and removed unless Media Library storage is enabled.','leenkat-forms'),
+        'Disable storing entry information in WordPress': __('Process notifications without saving answers or searchable entry values. Notifications are sent immediately without a persistent retry queue. Uploaded files used in notifications are removed after processing.','leenkat-forms'),
         'Disable storing user details (IP address and user agent)': __('Exclude IP address and user agent from new entries. This does not rewrite existing entries or web-server logs.','leenkat-forms'),
         'Searchable entry value': __('Include this answer in searchable entry values.', 'leenkat-forms')
     };
@@ -206,8 +206,8 @@
             }).catch(error => { setMessage({ type: 'error', text: error.message }); setLoading(false); });
         }, []);
         useEffect(()=>{
-            if(loading || !window.lkfPointerSort)return;
-            return window.lkfPointerSort.attach(document.getElementById('lkf-builder-root'),{
+            if(loading || !window.leenfoPointerSort)return;
+            return window.leenfoPointerSort.attach(document.getElementById('lkf-builder-root'),{
                 source:target=>pointerCallbacks.current.source(target),
                 target:(source,point,last)=>pointerCallbacks.current.target(source,point,last),
                 change:(source,target,height)=>setPointerView({source,target,height}),
@@ -501,7 +501,7 @@
             const rightColumnKey = JSON.stringify({ kind: 'column', anchorId: field.id, side: 'right' });
             return e('div', {
                 key: field.id, 'data-field-id': field.id, className: 'lkf-canvas-field' + (field.type==='page_break'?' is-page-break':'') + (selected === field.id ? ' is-selected' : '') + (dragSource?.id === field.id ? ' is-dragging' : '') + (dropTarget === beforeKey ? ' is-drop-before' : '') + (dropTarget === afterKey ? ' is-drop-after' : '') + (dropTarget === leftColumnKey ? ' is-drop-column-left' : '') + (dropTarget === rightColumnKey ? ' is-drop-column-right' : ''),
-                draggable: !window.lkfPointerSort, tabIndex: 0, role: 'group',
+                draggable: !window.leenfoPointerSort, tabIndex: 0, role: 'group',
                 'aria-label': field.label + '. ' + __('Press Control and an arrow key to reorder.', 'leenkat-forms'),
                 'aria-keyshortcuts': 'Control+ArrowUp Control+ArrowDown',
                 onDragStart: event => startDrag(event, { kind: 'field', id: field.id }),
@@ -579,7 +579,7 @@
             );
         }
         async function importForm(event) {const file=event.target.files?.[0];if(!file)return;try{if(file.size>2097152)throw new Error(__('Choose a JSON file no larger than 2 MiB.','leenkat-forms'));const value=JSON.parse((await file.text()).replace(/^\uFEFF/,''));const data=await request(config.transferApi+'decode','POST',value);setPendingImport(data);}catch(error){setMessage({type:'error',text:error.message});}event.target.value='';}
-        let pointerPlaceholderId='lkf_drag_placeholder';while(definition.fields.some(field=>field.id===pointerPlaceholderId))pointerPlaceholderId+='_';
+        let pointerPlaceholderId='leenfo_drag_placeholder';while(definition.fields.some(field=>field.id===pointerPlaceholderId))pointerPlaceholderId+='_';
         const current = definition.fields.find(field => field.id === selected);
         const currentRule = (definition.rules || []).find(rule => rule.field_id === selected);
         const previousFields = current ? definition.fields.slice(0, definition.fields.findIndex(field => field.id === selected)) : [];
@@ -613,7 +613,7 @@
             );
         }
         const paletteButton = ([type, label]) => e('button', {
-            key: type, type: 'button', 'data-palette-type':type, className: 'lkf-palette-item', draggable: type!=='captcha'&&!window.lkfPointerSort,
+            key: type, type: 'button', 'data-palette-type':type, className: 'lkf-palette-item', draggable: type!=='captcha'&&!window.leenfoPointerSort,
             onDragStart: event => {if(type==='captcha'){event.preventDefault();return;}startDrag(event, { kind: 'new', type });},
             onDragEnd: endDrag,
             onClick: () => insert(type)
@@ -666,13 +666,13 @@
             const setOptions=next=>updateSettings(current.id,{options:next,default_options:defaults.filter(value=>next.includes(value)),...Object.fromEntries(['choice_images','choice_icons'].map(key=>[key,Object.fromEntries(Object.entries(current.settings?.[key] || {}).filter(([value])=>next.includes(value)))]))});
             const choiceEntries=options.map((value,index)=>({value,index}));
             const visualChoiceEntries=pointerView?.source.kind==='choice' && pointerView.source.fieldId===current.id && pointerView.target
-                ? window.lkfPointerSort.move(choiceEntries,pointerView.source.from,pointerView.target.index):choiceEntries;
+                ? window.leenfoPointerSort.move(choiceEntries,pointerView.source.from,pointerView.target.index):choiceEntries;
             const addChoice=index=>{let label=__('New Choice','leenkat-forms');let suffix=2;while(options.includes(label)) label=__('New Choice','leenkat-forms')+' '+suffix++;const next=[...options];next.splice(index+1,0,label);setOptions(next);};
             return e('div',{className:'lkf-choice-editor'},
                 e('div',{className:'lkf-choices-heading'},e('span',{},__('Choices','leenkat-forms'),helpIcon(__('Choices','leenkat-forms'),__('Add, remove, reorder and select the default choices.','leenkat-forms'))),e(Button,{variant:'tertiary',onClick:()=>setBulkChoices(bulkChoices===null?'':null)},__('Bulk Add','leenkat-forms'))),
                 (current.settings?.dynamic_choices && current.settings.dynamic_choices!=='off')?e('p',{},__('Choices are populated from the selected dynamic source.','leenkat-forms')):visualChoiceEntries.map(({value,index})=>pointerView?.source.kind==='choice' && pointerView.source.fieldId===current.id && pointerView.source.from===index?e('div',{key:index,'data-pointer-placeholder':true,className:'lkf-choice-placeholder',style:{height:pointerView.height},'aria-hidden':true}):e('div',{key:index,className:'lkf-choice-row'+(choiceHover===index?' is-choice-target':''),'data-choice-index':index,onDragOver:event=>{if(choiceDrag.current!==null){event.preventDefault();event.stopPropagation();event.dataTransfer.dropEffect='move';}},onDrop:event=>{event.preventDefault();event.stopPropagation();const from=choiceDrag.current;choiceDrag.current=null;if(from===null)return;const next=[...options];next.splice(index,0,next.splice(from,1)[0]);setOptions(next);}},
                     e('input',{type:multiple?'checkbox':'radio',checked:defaults.includes(value),'aria-label':__('Default choice','leenkat-forms')+' '+(index+1),onChange:()=>{},onClick:()=>updateSettings(current.id,{default_options:defaults.includes(value)?defaults.filter(item=>item!==value):multiple?[...defaults,value]:[value]})}),
-                    e('span',{role:'button',tabIndex:0,className:'lkf-choice-handle',style:{touchAction:'none'},'aria-label':__('Move choice','leenkat-forms')+' '+(index+1),onPointerDown:event=>{if(window.lkfPointerSort)return;if(event.button!==0)return;event.preventDefault();event.stopPropagation();choiceDrag.current=index;event.currentTarget.setPointerCapture(event.pointerId);},onPointerMove:event=>{if(window.lkfPointerSort)return;if(choiceDrag.current===null)return;const row=document.elementFromPoint(event.clientX,event.clientY)?.closest('.lkf-choice-row');setChoiceHover(row?Number(row.dataset.choiceIndex):-1);},onPointerUp:event=>{if(window.lkfPointerSort)return;const from=choiceDrag.current;choiceDrag.current=null;const row=document.elementFromPoint(event.clientX,event.clientY)?.closest('.lkf-choice-row');setChoiceHover(-1);if(from===null||!row||row.closest('.lkf-choice-editor')!==event.currentTarget.closest('.lkf-choice-editor'))return;const to=Number(row.dataset.choiceIndex);if(to===from)return;const next=[...options];next.splice(to,0,next.splice(from,1)[0]);setOptions(next);},onPointerCancel:()=>{if(window.lkfPointerSort)return;choiceDrag.current=null;setChoiceHover(-1);},onKeyDown:event=>{if(!event.ctrlKey || !['ArrowUp','ArrowDown'].includes(event.key))return;event.preventDefault();const to=index+(event.key==='ArrowUp'?-1:1);if(to<0||to>=options.length)return;const next=[...options];next.splice(to,0,next.splice(index,1)[0]);setOptions(next);}},'☰'),
+                    e('span',{role:'button',tabIndex:0,className:'lkf-choice-handle',style:{touchAction:'none'},'aria-label':__('Move choice','leenkat-forms')+' '+(index+1),onPointerDown:event=>{if(window.leenfoPointerSort)return;if(event.button!==0)return;event.preventDefault();event.stopPropagation();choiceDrag.current=index;event.currentTarget.setPointerCapture(event.pointerId);},onPointerMove:event=>{if(window.leenfoPointerSort)return;if(choiceDrag.current===null)return;const row=document.elementFromPoint(event.clientX,event.clientY)?.closest('.lkf-choice-row');setChoiceHover(row?Number(row.dataset.choiceIndex):-1);},onPointerUp:event=>{if(window.leenfoPointerSort)return;const from=choiceDrag.current;choiceDrag.current=null;const row=document.elementFromPoint(event.clientX,event.clientY)?.closest('.lkf-choice-row');setChoiceHover(-1);if(from===null||!row||row.closest('.lkf-choice-editor')!==event.currentTarget.closest('.lkf-choice-editor'))return;const to=Number(row.dataset.choiceIndex);if(to===from)return;const next=[...options];next.splice(to,0,next.splice(from,1)[0]);setOptions(next);},onPointerCancel:()=>{if(window.leenfoPointerSort)return;choiceDrag.current=null;setChoiceHover(-1);},onKeyDown:event=>{if(!event.ctrlKey || !['ArrowUp','ArrowDown'].includes(event.key))return;event.preventDefault();const to=index+(event.key==='ArrowUp'?-1:1);if(to<0||to>=options.length)return;const next=[...options];next.splice(to,0,next.splice(index,1)[0]);setOptions(next);}},'☰'),
                     e(TextControl,{label:__('Choice','leenkat-forms')+' '+(index+1),hideLabelFromVision:true,value,onChange:nextValue=>{const next=[...options];next[index]=nextValue;updateSettings(current.id,{options:next,default_options:defaults.map(item=>item===value?nextValue:item),...Object.fromEntries(['choice_images','choice_icons'].map(key=>{const media={...(current.settings?.[key] || {})};if(Object.hasOwn(media,value)){media[nextValue]=media[value];if(nextValue!==value)delete media[value];}return[key,media];}))});}}),
                     e(Button,{className:'lkf-choice-add',disabled:options.length>=100,'aria-label':__('Add choice after','leenkat-forms')+' '+(index+1),onClick:()=>addChoice(index)},'+'),
                     e(Button,{className:'lkf-choice-remove',disabled:options.length<=1,'aria-label':__('Remove choice','leenkat-forms')+' '+(index+1),onClick:()=>setOptions(options.filter((_,position)=>position!==index))},'−'),
@@ -748,7 +748,7 @@
                     sizedTypes.includes(current.type) && optionControl(SelectControl, { label: __('Field Size', 'leenkat-forms'), value: current.settings?.field_size || 'large', options: [['small', __('Small', 'leenkat-forms')], ['medium', __('Medium', 'leenkat-forms')], ['large', __('Large', 'leenkat-forms')]].map(([value, label]) => ({ value, label })), onChange: value => updateSettings(current.id, { field_size: value }) }),
                     current.type==='datetime' && renderDateTimeOptions(),
                     current.type==='address' && renderAddressOptions(),
-                    current.type==='file_upload' && e('div',{},optionControl(SelectControl,{label:__('Style','leenkat-forms'),value:current.settings?.upload_style || 'modern',options:[{value:'modern',label:__('Modern','leenkat-forms')},{value:'classic',label:__('Classic','leenkat-forms')}],onChange:value=>updateSettings(current.id,{upload_style:value})},'upload-style'),toggleOption({label:__('Store file in WordPress Media Library','leenkat-forms'),checked:!!current.settings?.media_library,help:__('Files saved to the Media Library use standard WordPress media URLs and may be publicly accessible. Turn this off to store new form attachments privately.','leenkat-forms'),onChange:value=>updateSettings(current.id,{media_library:value})})),
+                    current.type==='file_upload' && e('div',{},optionControl(SelectControl,{label:__('Style','leenkat-forms'),value:current.settings?.upload_style || 'modern',options:[{value:'modern',label:__('Modern','leenkat-forms')},{value:'classic',label:__('Classic','leenkat-forms')}],onChange:value=>updateSettings(current.id,{upload_style:value})},'upload-style')),
                     current.type==='number_slider' && optionControl(TextControl,{label:__('Value Display','leenkat-forms'),value:current.settings?.value_display ?? __("Selected Value: {value}", 'leenkat-forms'),onChange:value=>updateSettings(current.id,{value_display:value})}),
                     current.type === 'name' && nameParts(current.settings).map(part => e('div',{key:part,className:'lkf-name-part-options'},
                         e('div',{className:'lkf-control-heading'}, e('span',{},nameCaption(part,current.settings)),helpIcon(nameCaption(part,current.settings),__('Set a placeholder and optional initial value for this part of the name.','leenkat-forms'))),
@@ -822,9 +822,9 @@
                         )
                     )
                 ),
-                settingsTab==='notifications' && e(window.lkfNotificationsEditor,{definition,formId,config:activeConfig,onChange:notifications=>commit({...definition,settings:{...definition.settings,notifications}})}),
-                settingsTab==='confirmations' && e(window.lkfConfirmationsEditor,{definition,config,onChange:confirmations=>commit({...definition,settings:{...definition.settings,confirmations}})}),
-                settingsTab==='security' && e(window.lkfSpamProtectionEditor,{definition,config:activeConfig,onChange:security=>commit({...definition,settings:{...definition.settings,security}}),captchaControls:e(window.lkfCaptchaSettingsEditor,{definition,config:activeConfig,embedded:true,onChange:setCaptchaEnabled,onSelectField:selectField})})
+                settingsTab==='notifications' && e(window.leenfoNotificationsEditor,{definition,formId,config:activeConfig,onChange:notifications=>commit({...definition,settings:{...definition.settings,notifications}})}),
+                settingsTab==='confirmations' && e(window.leenfoConfirmationsEditor,{definition,config,onChange:confirmations=>commit({...definition,settings:{...definition.settings,confirmations}})}),
+                settingsTab==='security' && e(window.leenfoSpamProtectionEditor,{definition,config:activeConfig,onChange:security=>commit({...definition,settings:{...definition.settings,security}}),captchaControls:e(window.leenfoCaptchaSettingsEditor,{definition,config:activeConfig,embedded:true,onChange:setCaptchaEnabled,onSelectField:selectField})})
             ));
         }
         function renderSetup() {
@@ -891,7 +891,7 @@
                     if(!row || !row.closest('.lkf-choice-editor'))return null;
                     const bounds=row.getBoundingClientRect();
                     const field=definition.fields.find(item=>item.id===source.fieldId);
-                    return {index:window.lkfPointerSort.insertionIndex(source.from,Number(row.dataset.choiceIndex),point.y>=bounds.top+bounds.height/2,field.settings.options.length)};
+                    return {index:window.leenfoPointerSort.insertionIndex(source.from,Number(row.dataset.choiceIndex),point.y>=bounds.top+bounds.height/2,field.settings.options.length)};
                 }
                 const canvas=hit?.closest('.lkf-canvas');
                 if(!canvas)return null;
@@ -909,7 +909,7 @@
             drop:(source,target)=>{
                 if(source.kind==='choice'){
                     const field=definition.fields.find(item=>item.id===source.fieldId);
-                    if(field && source.from!==target.index)updateSettings(source.fieldId,{options:window.lkfPointerSort.move(field.settings.options,source.from,target.index)});
+                    if(field && source.from!==target.index)updateSettings(source.fieldId,{options:window.leenfoPointerSort.move(field.settings.options,source.from,target.index)});
                 }else performDrop(source,target);
             }
         };

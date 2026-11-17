@@ -68,6 +68,6 @@
             dialog && e(Modal,{title:__(dialog.kind==='delete'?__("Delete confirmation?", 'leenkat-forms'):dialog.kind==='add'?__("Add New Confirmation", 'leenkat-forms'):__("Rename Confirmation", 'leenkat-forms'),'leenkat-forms'),className:'lkf-notification-dialog',onRequestClose:()=>setDialog(null)},dialog.kind==='delete'?e('p',{},__('Remove this confirmation from future submissions?','leenkat-forms')):e(TextControl,{label:__('Confirmation Name','leenkat-forms'),value:name,maxLength:100,autoFocus:true,onChange:setName}),e('div',{className:'lkf-notification-dialog-actions'},e(Button,{variant:'secondary',onClick:()=>setDialog(null)},__('Cancel','leenkat-forms')),e(Button,{variant:'primary',isDestructive:dialog.kind==='delete',disabled:dialog.kind!=='delete' && !name.trim(),onClick:confirmDialog},__(dialog.kind==='delete'?__("Delete Confirmation", 'leenkat-forms'):dialog.kind==='add'?__("Add Confirmation", 'leenkat-forms'):__("Save Name", 'leenkat-forms'),'leenkat-forms'))))
         );
     }
-    window.lkfConfirmationsEditor=Editor;window.lkfConfirmationsModel={defaults,normalize};
+    window.leenfoConfirmationsEditor=Editor;window.leenfoConfirmationsModel={defaults,normalize};
 })(window.wp.element,window.wp.components,window.wp.i18n);
 

@@ -2,8 +2,8 @@
     'use strict';
     const __ = typeof window !== 'undefined' && window.wp?.i18n?.__ ? window.wp.i18n.__ : value => value;
     // Builder previews can request the same script again while replacing a widget.
-    if (window.lkfForms) { window.lkfForms.init(); return; }
-    function message(form,key,fallback,value){return window.lkfValidation?.text(form,key,value)||fallback;}
+    if (window.leenfoForms) { window.leenfoForms.init(); return; }
+    function message(form,key,fallback,value){return window.leenfoValidation?.text(form,key,value)||fallback;}
     function securityProof(form) {
         const input=form.querySelector('[data-lkf-security-url]');if(!input)return Promise.resolve();
         if(form._lkfSecurityProof&&Date.now()-(form._lkfSecurityLoaded || 0)<3600000)return form._lkfSecurityProof;
@@ -47,7 +47,7 @@
                 else if (!(match[1] in values)) values[match[1]] = '';
             } else values[match[1]] = input.dataset?.lkfPhone==='smart' && input.value && input._lkfPhone ? input._lkfPhone.getNumber() : input.value;
         }
-        if(form.dataset?.lkfSources)return window.lkfRules.normalizeValues(JSON.parse(form.dataset.lkfSources),values);
+        if(form.dataset?.lkfSources)return window.leenfoRules.normalizeValues(JSON.parse(form.dataset.lkfSources),values);
         for (const [id, value] of Object.entries(values)) if (value && typeof value === 'object' && !Array.isArray(value)) values[id] = [value.first || '', value.middle || '', value.last || ''].filter(Boolean).join(' ').trim();
         return values;
     }
@@ -56,7 +56,7 @@
         for (const wrapper of form.querySelectorAll('[data-lkf-rule]')) {
             let rule;
             try { rule = JSON.parse(wrapper.dataset.lkfRule); } catch { continue; }
-            const show = window.lkfRules.visible(rule.field_id, [rule], values,form.dataset?.lkfSources?JSON.parse(form.dataset.lkfSources):null);
+            const show = window.leenfoRules.visible(rule.field_id, [rule], values,form.dataset?.lkfSources?JSON.parse(form.dataset.lkfSources):null);
             wrapper.hidden = !show;
             for (const input of wrapper.querySelectorAll('input,select,textarea')) input.disabled = !show;
             for (const select of wrapper.querySelectorAll('[data-lkf-modern]')) { if (select._lkfChoices) show ? select._lkfChoices.enable() : select._lkfChoices.disable(); }
@@ -65,8 +65,8 @@
     }
     function validateFields(form) {
         for(const input of form.querySelectorAll('[data-lkf-max-chars]')) {
-            const value=window.lkfRules.normalizeText(input.value),characters=Number(input.dataset.lkfMaxChars),words=Number(input.dataset.lkfMaxWords || 0),bytes=Number(input.dataset.lkfMaxBytes);
-            const error=!window.lkfRules.validUnicode(value)?message(form,'unicode',__("Please enter valid Unicode text.", 'leenkat-forms')):window.lkfRules.textLength(value)>characters?message(form,'characters',__("Please use no more than ", 'leenkat-forms')+characters+__(" characters.", 'leenkat-forms'),characters):words&&window.lkfRules.textLength(value,'words')>words?message(form,'words',__("Please use no more than ", 'leenkat-forms')+words+__(" words.", 'leenkat-forms'),words):new TextEncoder().encode(value).length>bytes?message(form,'bytes',__("This value exceeds the text byte-size limit.", 'leenkat-forms')):'';
+            const value=window.leenfoRules.normalizeText(input.value),characters=Number(input.dataset.lkfMaxChars),words=Number(input.dataset.lkfMaxWords || 0),bytes=Number(input.dataset.lkfMaxBytes);
+            const error=!window.leenfoRules.validUnicode(value)?message(form,'unicode',__("Please enter valid Unicode text.", 'leenkat-forms')):window.leenfoRules.textLength(value)>characters?message(form,'characters',__("Please use no more than ", 'leenkat-forms')+characters+__(" characters.", 'leenkat-forms'),characters):words&&window.leenfoRules.textLength(value,'words')>words?message(form,'words',__("Please use no more than ", 'leenkat-forms')+words+__(" words.", 'leenkat-forms'),words):new TextEncoder().encode(value).length>bytes?message(form,'bytes',__("This value exceeds the text byte-size limit.", 'leenkat-forms')):'';
             input.setCustomValidity(input.disabled?'':error);
         }
         for(const wrapper of form.querySelectorAll('[data-lkf-date-dropdown]')){
@@ -83,7 +83,7 @@
             const files=Array.from(input.files || []),allowed=input.accept.toLowerCase().split(',');
             const maximum=Number(input.dataset.maxFiles),size=input.dataset.maxSizeLabel||String(Number(input.dataset.maxBytes)/1048576)+' MB',extensions=allowed.map(ext=>ext.trim().replace(/^\./,'')).filter(Boolean).join(', ');
             const error=files.length>maximum?message(form,'file_count',__("You can upload a maximum of ", 'leenkat-forms')+maximum+__(" file(s).", 'leenkat-forms'),maximum):files.some(file=>file.size>Number(input.dataset.maxBytes))?message(form,'file_size',__("This file exceeds the maximum size of ", 'leenkat-forms')+size+'.',size):files.some(file=>!allowed.includes('.'+file.name.split('.').pop().toLowerCase())||/\.(php[0-9]*|pht(?:ml)?|phar|html?|shtml|cgi|pl|py|rb|aspx?|jsp?|svg|exe|bat|cmd|ps1|com|scr|msi|dll)(?:\.|$)/i.test(file.name))?message(form,'file_type',__("This file extension is not allowed. Allowed extensions: ", 'leenkat-forms')+extensions+'.',extensions):'';
-            input.setCustomValidity(input.disabled?'':error);const status=input.closest('fieldset')?.querySelector('.lkf-upload-status');if(status)status.textContent=(window.lkfValidation?'':error) || files.map(file=>file.name).join('\n');
+            input.setCustomValidity(input.disabled?'':error);const status=input.closest('fieldset')?.querySelector('.lkf-upload-status');if(status)status.textContent=(window.leenfoValidation?'':error) || files.map(file=>file.name).join('\n');
         }
         for (const group of form.querySelectorAll('[data-lkf-choice-group]')) {
             const inputs = Array.from(group.querySelectorAll('input[type=checkbox]'));
@@ -117,9 +117,9 @@
         form.noValidate=true;
         for(const input of form.querySelectorAll('[data-lkf-picker]')) if(window.flatpickr && !input._flatpickr) {
             const settings=JSON.parse(input.dataset.pickerSettings);const date=input.dataset.lkfPicker==='date';
-            const options={disableMobile:true,allowInput:false,altInput:true,dateFormat:date?'Y-m-d':'H:i',altFormat:date?settings.date_format || 'm/d/Y':settings.time_format==='24'?'H:i':'h:i K',enableTime:!date,noCalendar:!date,time_24hr:settings.time_format==='24',minuteIncrement:settings.time_interval || 30,onChange:()=>{delete form.dataset.lkfSubmissionUuid;applyRules(form);validateFields(form);window.lkfValidation?.refresh(form,input);}};
+            const options={disableMobile:true,allowInput:false,altInput:true,dateFormat:date?'Y-m-d':'H:i',altFormat:date?settings.date_format || 'm/d/Y':settings.time_format==='24'?'H:i':'h:i K',enableTime:!date,noCalendar:!date,time_24hr:settings.time_format==='24',minuteIncrement:settings.time_interval || 30,onChange:()=>{delete form.dataset.lkfSubmissionUuid;applyRules(form);validateFields(form);window.leenfoValidation?.refresh(form,input);}};
             if(date && settings.disable_past_dates)options.minDate=input.dataset.today;
-            const locale=window.lkfWidgetI18n?.date();if(locale)options.locale=locale;
+            const locale=window.leenfoWidgetI18n?.date();if(locale)options.locale=locale;
             if(date && settings.limit_days)options.disable=[day=>!(settings.allowed_days || [1,2,3,4,5]).includes(day.getDay())];
             if(!date && settings.limit_hours){options.minTime=settings.time_min || '09:00';options.maxTime=settings.time_max || '17:00';}
             const picker=window.flatpickr(input,options);picker.altInput.setAttribute('aria-label',input.closest('label')?.querySelector('span')?.textContent || (date?__("Date", 'leenkat-forms'):__("Time", 'leenkat-forms')));picker.altInput.placeholder=settings[date?'date_placeholder':'time_placeholder'] || '';picker.altInput.required=input.required;
@@ -133,21 +133,21 @@
             if (input) output.value = output.dataset.lkfValueDisplay.split('{value}').join(input.value);
         }
         for(const input of form.querySelectorAll('[data-lkf-phone="smart"]')) if(window.intlTelInput && !input._lkfPhone) {
-            input._lkfPhone=window.intlTelInput(input,{initialCountry:'us',autoPlaceholder:'off',formatOnDisplay:true,...(window.lkfWidgetI18n?.phone() || {})});
-            input.addEventListener('countrychange',()=>{applyRules(form);validateFields(form);window.lkfValidation?.refresh(form,input);});
+            input._lkfPhone=window.intlTelInput(input,{initialCountry:'us',autoPlaceholder:'off',formatOnDisplay:true,...(window.leenfoWidgetI18n?.phone() || {})});
+            input.addEventListener('countrychange',()=>{applyRules(form);validateFields(form);window.leenfoValidation?.refresh(form,input);});
         }
-        for(const select of form.querySelectorAll('[data-lkf-modern]')) if(window.Choices && !select._lkfChoices) select._lkfChoices=new window.Choices(select,{allowHTML:false,shouldSort:false,removeItemButton:select.multiple,searchEnabled:true,itemSelectText:'',placeholder:true,placeholderValue:select.dataset.placeholder,...(window.lkfWidgetI18n?.choices() || {})});
+        for(const select of form.querySelectorAll('[data-lkf-modern]')) if(window.Choices && !select._lkfChoices) select._lkfChoices=new window.Choices(select,{allowHTML:false,shouldSort:false,removeItemButton:select.multiple,searchEnabled:true,itemSelectText:'',placeholder:true,placeholderValue:select.dataset.placeholder,...(window.leenfoWidgetI18n?.choices() || {})});
         applyRules(form);validateFields(form);
-        form._lkfSteps=window.lkfSteps?.mount(form,()=>{applyRules(form);validateFields(form);});
-        window.lkfValidation?.hydrate(form);
+        form._lkfSteps=window.leenfoSteps?.mount(form,()=>{applyRules(form);validateFields(form);});
+        window.leenfoValidation?.hydrate(form);
     }
     document.addEventListener('input', event => {
         const form = event.target.closest?.('[data-lkf-form]');
-        if (form) { if (event.target.dataset?.lkfInputMask) event.target.value = formatMask(event.target.value, event.target.dataset.lkfInputMask); if(event.target.dataset?.lkfPhone==='us') {let digits=event.target.value.replace(/\D/g,'');if(digits.length===11&&digits.startsWith('1'))digits=digits.slice(1);event.target.value=formatMask(digits,'(999) 999-9999');} delete form.dataset.lkfSubmissionUuid; if (event.target.type === 'range') { const output = event.target.parentElement?.querySelector('output'); if (output) output.value = (output.dataset.lkfValueDisplay ?? '{value}').split('{value}').join(event.target.value); } applyRules(form);validateFields(form);window.lkfValidation?.refresh(form,event.target); }
+        if (form) { if (event.target.dataset?.lkfInputMask) event.target.value = formatMask(event.target.value, event.target.dataset.lkfInputMask); if(event.target.dataset?.lkfPhone==='us') {let digits=event.target.value.replace(/\D/g,'');if(digits.length===11&&digits.startsWith('1'))digits=digits.slice(1);event.target.value=formatMask(digits,'(999) 999-9999');} delete form.dataset.lkfSubmissionUuid; if (event.target.type === 'range') { const output = event.target.parentElement?.querySelector('output'); if (output) output.value = (output.dataset.lkfValueDisplay ?? '{value}').split('{value}').join(event.target.value); } applyRules(form);validateFields(form);window.leenfoValidation?.refresh(form,event.target); }
     });
     document.addEventListener('change', event => {
         const form = event.target.closest?.('[data-lkf-form]');
-        if (form) { delete form.dataset.lkfSubmissionUuid; applyRules(form);validateFields(form);window.lkfValidation?.refresh(form,event.target); }
+        if (form) { delete form.dataset.lkfSubmissionUuid; applyRules(form);validateFields(form);window.leenfoValidation?.refresh(form,event.target); }
     });
     document.addEventListener('submit', async event => {
         const form = event.target;
@@ -158,14 +158,14 @@
         validateFields(form);
         if(form._lkfSteps && !form._lkfSteps.isLast()){form._lkfSteps.advance();return;}
         if(form._lkfSteps && !form._lkfSteps.validateAll())return;
-        if(window.lkfValidation){if(window.lkfValidation.validate(form))return;}else if(!form.reportValidity())return;
+        if(window.leenfoValidation){if(window.leenfoValidation.validate(form))return;}else if(!form.reportValidity())return;
         const box = form.querySelector('.lkf-errors');
         const button = form.querySelector('[type="submit"]');
         const originalText=button.textContent;
         const processingText=form.dataset.processingText;
         button.disabled=true;
         form.setAttribute('aria-busy','true');
-        try {await securityProof(form);if(form.querySelector('[data-lkf-captcha]')){if(!window.lkfCaptcha)throw new Error(__("CAPTCHA is unavailable. Reload this page and try again.", 'leenkat-forms'));await window.lkfCaptcha.prepare(form);}}catch(error){box.textContent=error.message;box.hidden=false;box.tabIndex=-1;box.focus();button.disabled=false;form.removeAttribute('aria-busy');return;}
+        try {await securityProof(form);if(form.querySelector('[data-lkf-captcha]')){if(!window.leenfoCaptcha)throw new Error(__("CAPTCHA is unavailable. Reload this page and try again.", 'leenkat-forms'));await window.leenfoCaptcha.prepare(form);}}catch(error){box.textContent=error.message;box.hidden=false;box.tabIndex=-1;box.focus();button.disabled=false;form.removeAttribute('aria-busy');return;}
         // Never inherit a visitor identity from shared HTML. Keep this identity
         // for unchanged retries, including native POST and bfcache restoration.
         if (!form.dataset.lkfSubmissionUuid) form.dataset.lkfSubmissionUuid = submissionUuid();
@@ -207,13 +207,13 @@
             const response = await fetch(form.dataset.lkfEndpoint || form.action, {method:'POST',...(hasUploads?{}:{headers:{'Content-Type':'application/json'}}),body:hasUploads?uploads:payload});
             const result = await response.json();
             if (!response.ok){const failure=new Error(result.message || __("Submission failed.", 'leenkat-forms'));failure.fieldErrors=result.data?.field_errors;throw failure;}
-            window.lkfConfirmation.show(form,result);
+            window.leenfoConfirmation.show(form,result);
         } catch (error) {
-            if(!error.fieldErrors||!window.lkfValidation?.server(form,error.fieldErrors)){
+            if(!error.fieldErrors||!window.leenfoValidation?.server(form,error.fieldErrors)){
                 box.textContent = error.message || __("Submission failed. Please try again.", 'leenkat-forms');
                 box.hidden = false; box.focus();
             }
-        } finally { window.lkfCaptcha?.reset(form);button.disabled = form.dataset.lkfCompleted==='1';button.textContent=originalText;form.removeAttribute('aria-busy'); }
+        } finally { window.leenfoCaptcha?.reset(form);button.disabled = form.dataset.lkfCompleted==='1';button.textContent=originalText;form.removeAttribute('aria-busy'); }
     });
     const initialized = new WeakSet();
     function init(root = document) {
@@ -223,10 +223,10 @@
             initialized.add(form);
             initialize(form);
             securityProof(form).catch(()=>{});
-            window.lkfCaptcha?.init(form);
+            window.leenfoCaptcha?.init(form);
         }
     }
-    window.lkfForms = { init };
+    window.leenfoForms = { init };
     function start() {
         init();
         new MutationObserver(records => {

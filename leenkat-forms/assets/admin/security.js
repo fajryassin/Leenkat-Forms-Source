@@ -47,7 +47,7 @@
             e('p',{className:'lkf-security-note'},e(Button,{variant:'secondary',onClick:config.refreshAkismet},__('Refresh Akismet status','leenkat-forms')))
         );
     }
-    window.lkfSecurityModel={defaults,normalize};window.lkfSpamProtectionEditor=SecurityEditor;
+    window.leenfoSecurityModel={defaults,normalize};window.leenfoSpamProtectionEditor=SecurityEditor;
 })(window.wp.element,window.wp.components,window.wp.i18n);
 
 
