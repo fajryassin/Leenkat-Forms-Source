@@ -33,7 +33,7 @@ final class NativeSubmission {
 					ConfirmationReceipt::privateHeaders();
 				}
 				// Reuse the authoritative endpoint; only the no-storage return rendering differs.
-            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing -- Server method/length metadata is compared with exact literals or cast and bounded; it is not WordPress-slash-encoded form content or HTML output. Anonymous public form POST is validated by the existing authoritative endpoint, signed protection/CAPTCHA policy and idempotency checks; no administrative action is exposed.
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing -- Valid method and length literals contain no slash-sensitive characters. Strict literal comparisons reject malformed metadata before use or mutation. Anonymous public form POST is validated by the existing authoritative endpoint, signed protection/CAPTCHA policy and idempotency checks; no administrative action is exposed.
 				if ( ( $_SERVER['REQUEST_METHOD'] ?? '' ) === 'POST' && ( $_POST['action'] ?? '' ) === 'leenfo_submit' ) {
 					self::process( true );
 				}
@@ -59,7 +59,7 @@ final class NativeSubmission {
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Anonymous submissions use the published-schema, signed protection/CAPTCHA and replay checks in PublicEndpoint.
 		$post    = wp_unslash( array_intersect_key( $_POST, $allowed ) );
 		$form_id = $post['form_id'] ?? '';
-		$id      = is_string( $form_id ) && ctype_digit( $form_id ) ? absint( $form_id ) : 0;
+		$id      = \LeenkatForms\Security\RequestInput::id( $form_id );
 		$request = new WP_REST_Request( 'POST' );
 		$request->set_param( 'id', $id );
 		$request->set_header( 'content-type', 'multipart/form-data' );
@@ -89,7 +89,7 @@ final class NativeSubmission {
 		}
 		$receipt = array(
 			'form'         => $id,
-			'instance'     => max( 1, min( 100, (int) ( $post['form_instance'] ?? 1 ) ) ),
+			'instance'     => max( 1, min( 100, \LeenkatForms\Security\RequestInput::id( $post['form_instance'] ?? 1 ) ) ),
 			'error'        => is_wp_error( $result ),
 			'message'      => is_wp_error( $result ) ? $result->get_error_message() : $data['message'],
 			'confirmation' => is_wp_error( $result ) ? null : $confirmation,
@@ -171,8 +171,9 @@ final class NativeSubmission {
 	public static function receipt( int $id, array $query, ?int $instance = null ): ?array {
 		if ( self::$memory_receipt ) {
 			$receipt = self::$memory_receipt;} else {
-			$token = $query['leenfo_receipt'] ?? null;
-			if ( ! is_string( $token ) || ! preg_match( '/^[A-Za-z0-9]{32}$/D', $token ) || (int) ( $query['leenfo_result_form'] ?? 0 ) !== $id ) {
+			$raw   = $query['leenfo_receipt'] ?? null;
+			$token = is_string( $raw ) ? sanitize_text_field( wp_unslash( $raw ) ) : null;
+			if ( ! is_string( $token ) || ! preg_match( '/^[A-Za-z0-9]{32}$/D', $token ) || \LeenkatForms\Security\RequestInput::id( is_string( $query['leenfo_result_form'] ?? null ) ? wp_unslash( $query['leenfo_result_form'] ) : null ) !== $id ) {
 				return null;
 			}
 			$receipt = get_transient( 'leenfo_result_' . $token );

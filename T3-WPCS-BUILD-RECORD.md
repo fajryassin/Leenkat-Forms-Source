@@ -1,3 +1,5 @@
+Historical build record. See T5-BUILD-RECORD.md for the current runtime.
+
 # Leenkat Forms 1.0.1 T3 WPCS build record
 
 The first-party runtime in leenkat-forms/ matches the T3 WPCS QA ZIP by file hash.

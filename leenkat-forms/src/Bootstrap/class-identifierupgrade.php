@@ -37,8 +37,7 @@ final class IdentifierUpgrade {
 		}
 		global $wpdb;
 		$lock = 'leenfo_upgrade_' . substr( hash( 'sha256', DB_NAME . '|' . $wpdb->prefix ), 0, 40 );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- MySQL advisory lock acquisition changes connection state. WordPress has no equivalent cross-worker lock and a cached response cannot prove ownership.
-		if ( (string) $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s, 0)', $lock ) ) !== '1' ) {
+		if ( ! \LeenkatForms\Infrastructure\Database\MigrationLock::acquire( $lock ) ) {
 			return false;
 		}
 		try {
@@ -69,8 +68,7 @@ final class IdentifierUpgrade {
 		} catch ( \Throwable ) {
 			return false;
 		} finally {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Release this connection's MySQL advisory lock. A cache cannot release database state.
-			$wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock ) );
+			\LeenkatForms\Infrastructure\Database\MigrationLock::release( $lock );
 		}
 	}
 
@@ -105,17 +103,27 @@ final class IdentifierUpgrade {
 	 */
 	private static function tables(): void {
 		global $wpdb;
-		$renames = array();
+		$renames        = array();
+		$sqlite_renames = array();
 		foreach ( array( 'forms', 'form_versions', 'entries', 'entry_values', 'entry_files', 'deliveries' ) as $name ) {
 			$old = $wpdb->prefix . self::OLD . $name;
 			$new = $wpdb->prefix . self::NEW . $name;
 			self::must( strlen( $new ) <= 64 );
 			if ( self::table_exists( $old ) ) {
 				self::must( ! self::table_exists( $new ) );
-				$renames[] = $wpdb->prepare( '%i TO %i', $old, $new );
+				$renames[]        = $wpdb->prepare( '%i TO %i', $old, $new );
+				$sqlite_renames[] = $wpdb->prepare( 'ALTER TABLE %i RENAME TO %i', $old, $new );
 			}
 		}
 		if ( $renames ) {
+			if ( \LeenkatForms\Infrastructure\Database\MigrationLock::sqlite() ) {
+				// The SQLite integration supports ALTER TABLE but not compound MySQL RENAME TABLE. The surrounding OS lease prevents competing upgrades; an interrupted rename is resumed by the exact old/new existence checks above.
+				foreach ( $sqlite_renames as $statement ) {
+                    // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- Each statement was prepared with %i identifiers above. Schema renames cannot be cached or expressed through a WordPress object API.
+					self::must( false !== $wpdb->query( $statement ) );
+				}
+				return;
+			}
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Every pair is built with %i placeholders above from fixed plugin-owned identifiers. MySQL requires one compound RENAME to switch all tables atomically.
 			self::must( $wpdb->query( 'RENAME TABLE ' . implode( ', ', $renames ) ) !== false );
 		}

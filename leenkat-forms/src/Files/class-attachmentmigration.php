@@ -123,7 +123,7 @@ final class AttachmentMigration {
 	 * @throws \RuntimeException Raised when a required operation cannot complete safely.
 	 */
 	private static function legacy_doc( string $run ): string {
-		$path = PrivateStorage::legacyRoot() . '/' . self::name( $run ) . '.json';
+		$path = PrivateStorage::legacy_source_root() . '/' . self::name( $run ) . '.json';
 		if ( ! PrivateStorage::noLinks( $path ) ) {
 			throw new \RuntimeException( esc_html__( 'Migration unavailable.', 'leenkat-forms' ) );
 		}
@@ -809,7 +809,7 @@ final class AttachmentMigration {
 		if ( null !== get_option( EncryptedStorage::KEY_OPTION, null ) ) {
 			$roots[ true ] = EncryptedStorage::root();
 		}
-		$roots[ false ] = PrivateStorage::legacyRoot();
+		$roots[ false ] = PrivateStorage::legacy_source_root();
 		$seen           = array();
 		global $wpdb;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- WordPress has no paginated option-name query. Read only the names of this plugin's non-autoloaded migration journals and authenticate each value separately.

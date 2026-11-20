@@ -45,7 +45,7 @@ final class FormManager {
 		if ( ! current_user_can( \LeenkatForms\Security\Capabilities::MANAGE_FORMS ) ) {
 			wp_die( esc_html__( 'Access denied.', 'leenkat-forms' ), '', array( 'response' => 403 ) ); }
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		$id = absint( $_GET['form_id'] ?? 0 );
+		$id = \LeenkatForms\Security\RequestInput::identifier( 'form_id' );
 		if ( $id ) {
 			global $wpdb;
 			$table = self::table();
@@ -63,9 +63,10 @@ final class FormManager {
 		if ( ! current_user_can( \LeenkatForms\Security\Capabilities::MANAGE_FORMS ) ) {
 			wp_die( esc_html__( 'Access denied.', 'leenkat-forms' ), '', array( 'response' => 403 ) ); }
 		ManagementPage::requirePost();
-		$id = absint( $_POST['form_id'] ?? 0 );
+		$id = \LeenkatForms\Security\RequestInput::identifier( 'form_id', true );
+		\LeenkatForms\Security\RequestInput::nonce_request();
 		check_admin_referer( 'leenfo_form_action_' . $id );
-		$operation = sanitize_key( (string) ( $_POST['operation'] ?? '' ) );
+		$operation = \LeenkatForms\Security\RequestInput::control( 'operation', true );
 		$ok        = self::perform( $id, $operation );
 		wp_safe_redirect(
 			add_query_arg(
@@ -161,6 +162,7 @@ final class FormManager {
 			wp_die( esc_html__( 'Access denied.', 'leenkat-forms' ), '', array( 'response' => 403 ) );
 		}
 		ManagementPage::requirePost();
+		\LeenkatForms\Security\RequestInput::nonce_request();
 		check_admin_referer( 'leenfo_forms_bulk' );
 		ManagementPage::paginationRequest( 'leenkat-forms-all' );
 		[$operation, $ids] = ManagementPage::requestOperation();
@@ -172,7 +174,7 @@ final class FormManager {
 				}
 			}
 		}
-		$status = ManagementPage::text( $_POST, 'status' );
+		$status = \LeenkatForms\Security\RequestInput::control( 'status', true );
 		wp_safe_redirect(
 			ManagementPage::url(
 				array(

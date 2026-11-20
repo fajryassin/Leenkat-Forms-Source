@@ -90,7 +90,7 @@ final class ToolsPage {
 	 */
 	private static function fail( string $message, int $status = 400 ): never {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Private formStart callers supply fixed literal attributes; the route suffix is escaped. JSON status is typed, not rendered as HTML. The enclosing admin handler enforces its capability and dedicated nonce through gate(), requirePost(), check_admin_referer() or wp_verify_nonce(); flags/type checks before that gate do not perform mutations. Values are exact-compared against a closed enum/literal or validated by the existing schema; sanitizing approval flags could turn a malformed value into approval.
-		if ( ( $_POST['leenfo_json'] ?? '' ) === '1' ) {
+		if ( '1' === \LeenkatForms\Security\RequestInput::control( 'leenfo_json', true ) ) {
 			wp_send_json( array( 'message' => $message ), $status );
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Private formStart callers supply fixed literal attributes; the route suffix is escaped. JSON status is typed, not rendered as HTML. The enclosing admin handler enforces its capability and dedicated nonce through gate(), requirePost(), check_admin_referer() or wp_verify_nonce(); flags/type checks before that gate do not perform mutations. Values are exact-compared against a closed enum/literal or validated by the existing schema; sanitizing approval flags could turn a malformed value into approval.
 		}wp_die( esc_html( $message ), '', array( 'response' => $status ) );}
@@ -120,19 +120,24 @@ final class ToolsPage {
 			$filename = is_array( $f ) && is_string( $f['name'] ?? null ) ? sanitize_file_name( $f['name'] ) : '';
 			$tmp      = is_array( $f ) && is_string( $f['tmp_name'] ?? null ) ? $f['tmp_name'] : '';
 			// Use only a PHP-registered uploaded temporary file. The original filename never becomes a filesystem path.
-			if ( ! is_array( $f ) || ( $f['error'] ?? UPLOAD_ERR_NO_FILE ) !== UPLOAD_ERR_OK || 'json' !== strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) ) || '' === $tmp || str_contains( $tmp, "\0" ) || ! is_uploaded_file( $tmp ) ) {
+			if ( ! is_array( $f ) || ( $f['error'] ?? UPLOAD_ERR_NO_FILE ) !== UPLOAD_ERR_OK || ! is_int( $f['size'] ?? null ) || ! is_string( $f['type'] ?? null ) || 'json' !== strtolower( pathinfo( $filename, PATHINFO_EXTENSION ) ) || '' === $tmp || str_contains( $tmp, "\0" ) || ! is_uploaded_file( $tmp ) ) {
 				throw new \InvalidArgumentException( __( 'Upload a valid .json export file.', 'leenkat-forms' ) );
 			}
 			$size = filesize( $tmp );
-			if ( ! $size || $size > T::MAX_BYTES ) {
+			if ( ! $size || $size !== $f['size'] || $size > T::MAX_BYTES ) {
 				throw new \InvalidArgumentException( __( 'The JSON file must be no larger than 2 MiB.', 'leenkat-forms' ) );
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Read one bounded PHP-upload temporary file after provenance checks. WP_Filesystem does not expose a read length and a remote request cannot access a PHP temporary file.
-			}$raw = file_get_contents( $tmp, false, null, 0, T::MAX_BYTES + 1 );
+			}$mime = ( new \finfo( FILEINFO_MIME_TYPE ) )->file( $tmp );
+			if ( ! in_array( $mime, array( 'application/json', 'text/plain' ), true ) ) {
+				throw new \InvalidArgumentException( __( 'Upload a valid .json export file.', 'leenkat-forms' ) );
+			}
+            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Read only the bounded, PHP-registered uploaded JSON file after MIME, size and filename validation.
+			$raw = file_get_contents( $tmp, false, null, 0, T::MAX_BYTES + 1 );
 			if ( ! is_string( $raw ) ) {
 				throw new \InvalidArgumentException( __( 'Upload a valid .json export file.', 'leenkat-forms' ) );
 			}$result = T::preview( $raw );
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The enclosing admin handler enforces its capability and dedicated nonce through gate(), requirePost(), check_admin_referer() or wp_verify_nonce(); flags/type checks before that gate do not perform mutations. Values are exact-compared against a closed enum/literal or validated by the existing schema; sanitizing approval flags could turn a malformed value into approval.
-			if ( ( $_POST['leenfo_json'] ?? '' ) === '1' ) {
+			if ( '1' === \LeenkatForms\Security\RequestInput::control( 'leenfo_json', true ) ) {
 				wp_send_json( $result );
 			}wp_safe_redirect( admin_url( 'admin.php?page=leenkat-forms-tools&view=import&preview=' . $result['token'] ) );
 			exit;
@@ -148,20 +153,10 @@ final class ToolsPage {
 		self::gate( 'leenfo_manage_forms', 'leenfo_tools_import' );
 		try {
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The enclosing admin handler enforces its capability and dedicated nonce through gate(), requirePost(), check_admin_referer() or wp_verify_nonce(); flags/type checks before that gate do not perform mutations. Exception messages reach fail(), which escapes HTML or emits JSON; preserve untranslated data semantics.
-			$raw       = wp_unslash( $_POST );
-			$selection = $raw['selection'] ?? array();
-			if ( ! is_array( $selection ) ) {
-				throw new \InvalidArgumentException( __( 'Invalid form selection.', 'leenkat-forms' ) );
-			}$selection = array_map(
-				static function ( $v ) {
-					if ( ! is_string( $v ) || ! ctype_digit( $v ) ) {
-						// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- The enclosing admin handler enforces its capability and dedicated nonce through gate(), requirePost(), check_admin_referer() or wp_verify_nonce(); flags/type checks before that gate do not perform mutations. Exception messages reach fail(), which escapes HTML or emits JSON; preserve untranslated data semantics.
-						throw new \InvalidArgumentException( __( 'Invalid selection.', 'leenkat-forms' ) );
-					}return (int) $v;
-				},
-				$selection
-			);
-			$result     = T::import( is_string( $raw['token'] ?? null ) ? $raw['token'] : '', $selection, ( $raw['confirm_duplicates'] ?? '' ) === '1' );
+			$selection  = \LeenkatForms\Security\RequestInput::ids( 'selection', true );
+			$token      = \LeenkatForms\Security\RequestInput::control( 'token', true );
+			$duplicates = '1' === \LeenkatForms\Security\RequestInput::control( 'confirm_duplicates', true );
+			$result     = T::import( $token, $selection, $duplicates );
 			wp_send_json( $result );
 		} catch ( \Throwable $e ) {
 			self::fail( $e->getMessage() );}
@@ -175,7 +170,7 @@ final class ToolsPage {
 		self::gate( 'leenfo_manage_forms', 'leenfo_tools_forms' );
 		try {
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The enclosing admin handler enforces its capability and dedicated nonce through gate(), requirePost(), check_admin_referer() or wp_verify_nonce(); flags/type checks before that gate do not perform mutations. Values are exact-compared against a closed enum/literal or validated by the existing schema; sanitizing approval flags could turn a malformed value into approval. Exception messages reach fail(), which escapes HTML or emits JSON; preserve untranslated data semantics.
-			$ids = ManagementPage::ids( wp_unslash( $_POST['form_ids'] ?? array() ) );
+			$ids = \LeenkatForms\Security\RequestInput::ids( 'form_ids' );
 			if ( ! $ids ) {
 				throw new \InvalidArgumentException( __( 'Choose forms.', 'leenkat-forms' ) );
 			}$bundle = T::selected( $ids );
@@ -193,18 +188,32 @@ final class ToolsPage {
 		self::gate( 'leenfo_view_entries', 'leenfo_tools_entries' );
 		try {
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Verified private/owned paths require native exclusive-create, bounded streams, leases and atomic cleanup; WP filesystem transports cannot preserve these guarantees. The enclosing admin handler enforces its capability and dedicated nonce through gate(), requirePost(), check_admin_referer() or wp_verify_nonce(); flags/type checks before that gate do not perform mutations.
-			$input = wp_unslash( array_intersect_key( $_POST, array_flip( array( 'form_id', 'field_ids', 'entry_status', 'start_date', 'end_date' ) ) ) );
-			$ids   = $input['field_ids'] ?? null;
-			if ( ! is_array( $ids ) ) {
+			$form_id = \LeenkatForms\Security\RequestInput::identifier( 'form_id', true );
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- gate() checks the export capability and action nonce before this read. Every field ID is type-checked below and validated against the exact stored field-ID allowlist by EntryCsv::filters(), preserving historical identifiers without rewriting them.
+			$raw_ids = isset( $_POST['field_ids'] ) && is_array( $_POST['field_ids'] ) ? wp_unslash( $_POST['field_ids'] ) : null;
+			if ( ! is_array( $raw_ids ) || ! array_is_list( $raw_ids ) || count( $raw_ids ) > 1000 ) {
 				throw new \InvalidArgumentException( __( 'Select fields to export.', 'leenkat-forms' ) );
-			}foreach ( array( 'entry_status', 'start_date', 'end_date' ) as $key ) {
-				if ( ! is_string( $input[ $key ] ?? '' ) ) {
+			}
+			$ids = array();
+			foreach ( $raw_ids as $id ) {
+				if ( ! is_string( $id ) ) {
 					throw new \InvalidArgumentException( __( 'Invalid export filters.', 'leenkat-forms' ) );
 				}
-			}$form_ids = ManagementPage::ids( array( $input['form_id'] ?? null ) );
-			if ( ! $form_ids ) {
+				// Preserve exact historical identifiers. EntryCsv::filters() validates every value against this form's stored field-ID allowlist before an export query or output.
+				$ids[] = $id;
+			}
+			if ( ! $form_id ) {
 				throw new \InvalidArgumentException( __( 'Invalid form ID.', 'leenkat-forms' ) );
-			}$f = EntryCsv::filters( $form_ids[0], $ids, $input['entry_status'] ?? 'complete', $input['start_date'] ?? '', $input['end_date'] ?? '' );
+			}
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- gate() already verified the export nonce and capability. This presence check preserves the existing distinction between an omitted status and an invalid empty value.
+			$status = array_key_exists( 'entry_status', $_POST ) ? \LeenkatForms\Security\RequestInput::control( 'entry_status', true ) : 'complete';
+			$f      = EntryCsv::filters(
+				$form_id,
+				$ids,
+				$status,
+				\LeenkatForms\Security\RequestInput::control( 'start_date', true ),
+				\LeenkatForms\Security\RequestInput::control( 'end_date', true )
+			);
 			self::download( 'text/csv; charset=utf-8', 'leenkat-entries-' . $f['form_id'] . '-' . gmdate( 'Ymd-His' ) . '.csv' );
 			$out = fopen( 'php://output', 'w' );
 			EntryCsv::write( $out, $f );
@@ -279,7 +288,7 @@ final class ToolsPage {
 			echo '<input type="hidden" name="token"><div data-lkf-import-list></div><p><label><input type="checkbox" name="confirm_duplicates" value="1"> ' . esc_html__( 'Import selected duplicate definitions as additional copies', 'leenkat-forms' ) . '</label></p><p class="description">' . esc_html__( 'ID conflicts use new database IDs. Field IDs and conditional references are preserved. All selected forms are imported together, or none are imported if any selected form fails. Preview expires after 15 minutes.', 'leenkat-forms' ) . '</p><button class="button button-primary">' . esc_html__( 'Import Selected as New Drafts', 'leenkat-forms' ) . '</button></form></section>';
 			// A server-created preview can also be resumed without re-uploading the file.
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use. Identifier/token is type-checked and validated by the existing digit/hex grammar and ownership/nonce gate before lookup or maintenance; keep exact identity.
-			$token = $_GET['preview'] ?? '';
+			$token = \LeenkatForms\Security\RequestInput::control( 'preview' );
 			if ( is_string( $token ) && preg_match( '/^[a-f0-9]{48}$/D', $token ) ) {
 				$raw = get_transient( 'leenfo_import_' . get_current_user_id() . '_' . $token );
 				if ( is_string( $raw ) ) {
@@ -313,7 +322,7 @@ final class ToolsPage {
 				global $wpdb;
 				if ( $manage ) {
 					// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Custom plugin tables and transaction control have no equivalent WordPress object API; values are prepared and access is gated by the caller. Fresh custom-table state is required for locking, ownership checks, exports and current admin results; a cache could be stale. Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-					$page = max( 1, absint( $_GET['tools_paged'] ?? 1 ) );
+					$page = max( 1, \LeenkatForms\Security\RequestInput::identifier( 'tools_paged' ) );
 					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin tables and transaction control have no equivalent WordPress object API; values are prepared and access is gated by the caller. Fresh custom-table state is required for locking, ownership checks, exports and current admin results; a cache could be stale. Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
 					$rows = $wpdb->get_results( $wpdb->prepare( "SELECT id,status,draft_definition FROM {$wpdb->prefix}leenfo_forms WHERE status<>'trashed' ORDER BY id DESC LIMIT 26 OFFSET %d", ( $page - 1 ) * 25 ) );
 					echo '<section class="lkf-tools-panel"><h2>' . esc_html__( 'Export Forms', 'leenkat-forms' ) . '</h2><p>' . esc_html__( 'Download selected saved draft definitions in one portable JSON file. Unsaved builder changes and published snapshots are not modified. Public choice-image URLs are references; media files and global settings are not bundled.', 'leenkat-forms' ) . '</p>';
@@ -335,7 +344,7 @@ final class ToolsPage {
 					}echo '</p></section>';}
 				if ( $entries ) {
 					// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Custom plugin tables and transaction control have no equivalent WordPress object API; values are prepared and access is gated by the caller. Fresh custom-table state is required for locking, ownership checks, exports and current admin results; a cache could be stale. Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-					$form_id = absint( $_GET['form_id'] ?? 0 );
+					$form_id = \LeenkatForms\Security\RequestInput::identifier( 'form_id' );
 					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin tables and transaction control have no equivalent WordPress object API; values are prepared and access is gated by the caller. Fresh custom-table state is required for locking, ownership checks, exports and current admin results; a cache could be stale. Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
 					$forms = $wpdb->get_results( "SELECT id,draft_definition FROM {$wpdb->prefix}leenfo_forms WHERE status<>'trashed' ORDER BY id DESC LIMIT 500" );
 					if ( $form_id && ! in_array( $form_id, array_map( static fn( $r )=> (int) $r->id, $forms ), true ) ) {

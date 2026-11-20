@@ -2,7 +2,7 @@
     'use strict';
     const model = factory();
     if (typeof module === 'object' && module.exports) module.exports = model;
-    if (root) root.lkfBuilderModel = model;
+    if (root) root.leenfoBuilderModel = model;
 })(typeof window === 'undefined' ? null : window, function () {
     'use strict';
     const __ = typeof window !== 'undefined' && window.wp?.i18n?.__ ? window.wp.i18n.__ : value => value;

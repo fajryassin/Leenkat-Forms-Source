@@ -1,7 +1,7 @@
 (function (root, factory) {
     const rules = factory();
     if (typeof module === 'object' && module.exports) module.exports = rules;
-    if (root) root.lkfRules = rules;
+    if (root) root.leenfoRules = rules;
 })(typeof window !== 'undefined' ? window : null, function () {
     'use strict';
     const normalizeText = value => value.replace(/\r\n?/g,'\n').replace(/^[ \t\n\r\0\v]+|[ \t\n\r\0\v]+$/g,'');

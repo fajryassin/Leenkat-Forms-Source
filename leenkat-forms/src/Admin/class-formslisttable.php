@@ -36,7 +36,7 @@ final class FormsListTable extends ManagementTable {
 	public function __construct( bool $overview = false ) {
 		$this->overview = $overview;
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		$this->status = ManagementPage::text( $_GET, 'status' );
+		$this->status = \LeenkatForms\Security\RequestInput::get( 'status' );
 		if ( ! in_array( $this->status, array( 'draft', 'published', 'trashed' ), true ) ) {
 			$this->status = '';
 		}
@@ -146,9 +146,9 @@ final class FormsListTable extends ManagementTable {
 		$stats = "SELECT form_id,SUM(status='complete') AS all_time,SUM(status='complete' AND ({$period})) AS period,MAX(CASE WHEN status='complete' THEN submitted_at_gmt END) AS last_entry,SUM(status='spam') AS spam FROM {$wpdb->prefix}leenfo_entries GROUP BY form_id";
 		$where = $this->status ? $wpdb->prepare( 'f.status=%s', $this->status ) : "f.status<>'trashed'";
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		$search = mb_substr( ManagementPage::text( $_GET, 's' ), 0, 100 );
+		$search = mb_substr( \LeenkatForms\Security\RequestInput::get( 's' ), 0, 100 );
 		// Search the title, not serialized settings or credentials in definitions.
-		$title = "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(f.draft_definition,'$.title')),'')";
+		$title = 'COALESCE(' . \LeenkatForms\Infrastructure\Database\JsonSql::text( 'f.draft_definition', '$.title' ) . ",'')";
 		if ( '' !== $search ) {
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifiers are fixed plugin table names from the trusted WordPress prefix; dynamic clauses are internal allowlists or already-prepared fragments, never raw request SQL.
 			$where .= $wpdb->prepare( " AND ({$title} LIKE %s OR f.id=%d)", '%' . $wpdb->esc_like( $search ) . '%', ctype_digit( $search ) ? (int) $search : 0 );
@@ -164,7 +164,7 @@ final class FormsListTable extends ManagementTable {
 			'last_entry' => 'last_entry',
 		);
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		$orderby   = $sorts[ ManagementPage::text( $_GET, 'orderby' ) ] ?? ( $this->overview ? 'f.created_at_gmt' : 'f.updated_at_gmt' );
+		$orderby   = $sorts[ \LeenkatForms\Security\RequestInput::get( 'orderby' ) ] ?? ( $this->overview ? 'f.created_at_gmt' : 'f.updated_at_gmt' );
 		$direction = $this->sortDirection();
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Custom plugin tables and transaction control have no equivalent WordPress object API; values are prepared and access is gated by the caller. Fresh custom-table state is required for locking, ownership checks, exports and current admin results; a cache could be stale. Identifiers are fixed plugin table names from the trusted WordPress prefix; dynamic clauses are internal allowlists or already-prepared fragments, never raw request SQL.
 		$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}leenfo_forms f WHERE {$where}" );
@@ -296,14 +296,14 @@ final class FormsListTable extends ManagementTable {
 			ManagementPage::periodSelect( $this->days );
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		echo '<label class="screen-reader-text" for="lkf-search">' . esc_html__( 'Search Forms', 'leenkat-forms' ) . '</label><input type="search" id="lkf-search" name="s" value="' . esc_attr( ManagementPage::text( $_GET, 's' ) ) . '"><button class="button">' . esc_html__( 'Search Forms', 'leenkat-forms' ) . '</button>';
+		echo '<label class="screen-reader-text" for="lkf-search">' . esc_html__( 'Search Forms', 'leenkat-forms' ) . '</label><input type="search" id="lkf-search" name="s" value="' . esc_attr( \LeenkatForms\Security\RequestInput::get( 's' ) ) . '"><button class="button">' . esc_html__( 'Search Forms', 'leenkat-forms' ) . '</button>';
 		ManagementPage::columnsButton();
 		echo '</form></div>';
 		if ( $this->overview ) {
 			echo '<form method="get"><input type="hidden" name="page" value="leenkat-forms-entries"><input type="hidden" name="status" value="' . esc_attr( $this->status ) . '"><input type="hidden" name="days" value="' . esc_attr( (string) $this->days ) . '">';
 			foreach ( array( 's', 'orderby', 'order' ) as $key ) {
 				// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-				echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( ManagementPage::text( $_GET, $key ) ) . '">';
+				echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( \LeenkatForms\Security\RequestInput::get( $key ) ) . '">';
 			}
 			$this->display();
 			echo '</form><p class="description">' . esc_html__( 'Entry totals include completed entries. Spam and Trash are available inside each form.', 'leenkat-forms' ) . '</p>';

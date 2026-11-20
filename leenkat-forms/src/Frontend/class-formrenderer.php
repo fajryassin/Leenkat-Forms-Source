@@ -77,7 +77,7 @@ final class FormRenderer {
 		FormAssets::styles();
 		wp_enqueue_script( 'leenfo-confirmation', plugins_url( 'assets/frontend/confirmation.js', LEENKAT_FORMS_FILE ), array(), LEENKAT_FORMS_VERSION . '.' . (string) filemtime( LEENKAT_FORMS_DIR . 'assets/frontend/confirmation.js' ), true );
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Input is consumed only by its existing explicit authorization/validation boundary, not as an unguarded state-changing request.
-		$definition = Prefill::definition( $published['definition'], $id, wp_unslash( $_GET ) );
+		$definition = Prefill::definition( $published['definition'], $id, Prefill::request( $id ) );
 		if ( $receipt && $receipt['error'] && isset( $receipt['fields'] ) ) {
 			$definition = FieldErrors::prefill( $definition, $receipt['fields'] );
 		}

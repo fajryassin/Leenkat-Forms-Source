@@ -39,11 +39,11 @@ Leenkat Forms does not currently import forms directly from other form-builder p
 
 = Hosting and operational requirements =
 
-Requires PHP 8.3 or newer and WordPress 7.1 or newer. The tested environments include local WordPress with MySQL and Linux hosting with Apache and MariaDB. Other server, database, cache, and multisite configurations have not been fully verified; multisite is not supported by this release.
+Requires PHP 8.3 or newer and WordPress 7.1 or newer. Verified environments include WordPress 7.1 and 7.1.4 with MySQL 8.4, and WordPress 7.1 with SQLite Database Integration 3.1.3. Local Apache and Nginx checks cover private-object direct access. Other server, database, cache, and multisite configurations have not been fully verified; multisite is not supported by this release.
 
-Private file uploads require PHP Sodium and Fileinfo and a writable WordPress uploads directory. Files attached to stored entries appear as private Media Library records. New files are authenticated and encrypted as they are written to per-form uploads directories. A direct static request may return ciphertext. Authorized WordPress download routes return the original file after verification. Older public Media Library items keep their original visibility.
+Activation requires PHP Sodium, Fileinfo and Mbstring. Private file uploads require a writable local WordPress uploads directory. Files attached to stored entries appear as private Media Library records. New files are authenticated and encrypted as they are written to per-form uploads directories. A deny-all .htaccess is installed before private writes. Apache denies direct access when AuthConfig overrides are enabled; Nginx and servers ignoring .htaccess can return only ciphertext. Authorized WordPress download routes return the original file after verification. Older public Media Library items keep their original visibility.
 
-Back up the WordPress database (which contains the private storage key) and uploads together; protect database backups separately from the public web tree. The encryption key must be restored unchanged when moving the site. Existing private objects and migration records remain in their original non-public storage; see PRIVATE-STORAGE.txt before relocating or rolling back an installation. There is no automatic plaintext fallback or attachment relocation. Confirm that the database tables support transactions (InnoDB).
+Back up the WordPress database (which contains the private storage key) and uploads together; protect database backups separately from the public web tree. The encryption key must be restored unchanged when moving the site. Historical registered private files are copied in verified, resumable batches to encrypted uploads objects while their originals and existing download identities are retained. Migration journals use WordPress options. See PRIVATE-STORAGE.txt before relocation or rollback. There is no plaintext fallback. MySQL tables must support transactions (InnoDB); SQLite uses its supported transactional integration.
 
 Configure a reliable WordPress cron mechanism and outgoing email delivery. A successful wp_mail() handoff does not guarantee delivery to the recipient's inbox. Notification processing can retry; external mail transport is not guaranteed to be exactly once.
 
@@ -66,7 +66,7 @@ Site administrators are responsible for informing visitors about enabled provide
 
 == Installation ==
 
-1. Confirm the host meets the WordPress/PHP requirements, has Sodium and Fileinfo, and supports writable WordPress uploads for encrypted attachments.
+1. Confirm the host meets the WordPress/PHP requirements, has Sodium, Fileinfo and Mbstring, and supports writable WordPress uploads for encrypted attachments.
 2. Install and activate Leenkat Forms through the WordPress Plugins screen.
 3. Open Leenkat Forms, create a form, and configure its fields, notifications, confirmations, and optional spam protection.
 4. Publish the form and embed it using the provided shortcode or a supported editor integration.
@@ -85,7 +85,7 @@ Yes. Use Page Break fields to create multiple steps and configure the available 
 
 = Are uploaded files publicly accessible? =
 
-New private attachments are stored as authenticated ciphertext under WordPress uploads and have no public plaintext file or thumbnail. WordPress can show the private Media Library record to authorized users. Downloads verify integrity in memory after checking authorization. Legacy attachments remain at their original locations. A valid unexpired signed email link authorizes the associated file, so handle those links carefully.
+New private attachments are stored as authenticated ciphertext under WordPress uploads and have no public plaintext file or thumbnail. WordPress can show the private Media Library record to authorized users. Downloads verify integrity in memory after checking authorization. Verified encrypted compatibility copies allow historical private downloads to follow the current uploads path; originals remain available for rollback. A valid unexpired signed email link authorizes the associated file, so handle those links carefully.
 
 = Can I use forms without JavaScript? =
 

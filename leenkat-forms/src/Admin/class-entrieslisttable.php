@@ -48,12 +48,12 @@ final class EntriesListTable extends ManagementTable {
 	public function __construct( object $form ) {
 		$this->form = $form;
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		$this->status = ManagementPage::text( $_GET, 'status' );
+		$this->status = \LeenkatForms\Security\RequestInput::get( 'status' );
 		if ( ! in_array( $this->status, array( 'complete', 'spam', 'trashed', 'all' ), true ) ) {
 			$this->status = 'complete';
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		$this->flag = ManagementPage::text( $_GET, 'flag' );
+		$this->flag = \LeenkatForms\Security\RequestInput::get( 'flag' );
 		if ( ! in_array( $this->flag, array( 'unread', 'starred' ), true ) ) {
 			$this->flag = '';
 		}
@@ -204,7 +204,10 @@ final class EntriesListTable extends ManagementTable {
 			$counts[ $row->status ] = (int) $row->n;
 		}
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin tables and transaction control have no equivalent WordPress object API; values are prepared and access is gated by the caller. Fresh custom-table state is required for locking, ownership checks, exports and current admin results; a cache could be stale.
-		$flags = $wpdb->get_row( $wpdb->prepare( "SELECT SUM(COALESCE(JSON_UNQUOTE(JSON_EXTRACT(meta,'$.is_read')),'false') NOT IN ('true','1')) AS unread,SUM(JSON_UNQUOTE(JSON_EXTRACT(meta,'$.is_starred')) IN ('true','1')) AS starred FROM {$wpdb->prefix}leenfo_entries WHERE form_id=%d AND status='complete'", $this->form->id ) );
+		$read    = \LeenkatForms\Infrastructure\Database\JsonSql::text( 'meta', '$.is_read' );
+		$starred = \LeenkatForms\Infrastructure\Database\JsonSql::text( 'meta', '$.is_starred' );
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,PluginCheck.Security.DirectDB.UnescapedDBParameter -- Fresh custom-table counts cannot use an object API. JsonSql::text() restricts columns to an internal identifier grammar and prepares the JSON paths; both callers above supply fixed literals. The form ID is prepared here. No request text enters these SQL fragments.
+		$flags = $wpdb->get_row( $wpdb->prepare( "SELECT SUM(COALESCE({$read},'false') NOT IN ('true','1')) AS unread,SUM({$starred} IN ('true','1')) AS starred FROM {$wpdb->prefix}leenfo_entries WHERE form_id=%d AND status='complete'", $this->form->id ) );
 		$views = array();
 		foreach ( array(
 			'complete' => __( 'All', 'leenkat-forms' ),
@@ -236,13 +239,15 @@ final class EntriesListTable extends ManagementTable {
 		$where  = $wpdb->prepare( 'e.form_id=%d', $this->form->id );
 		$where .= 'all' === $this->status ? " AND e.status<>'trashed'" : $wpdb->prepare( ' AND e.status=%s', $this->status );
 		if ( 'unread' === $this->flag ) {
-			$where .= " AND COALESCE(JSON_UNQUOTE(JSON_EXTRACT(e.meta,'$.is_read')),'false') NOT IN ('true','1')";
+			$read   = \LeenkatForms\Infrastructure\Database\JsonSql::text( 'e.meta', '$.is_read' );
+			$where .= " AND COALESCE({$read},'false') NOT IN ('true','1')";
 		}
 		if ( 'starred' === $this->flag ) {
-			$where .= " AND JSON_UNQUOTE(JSON_EXTRACT(e.meta,'$.is_starred')) IN ('true','1')";
+			$starred = \LeenkatForms\Infrastructure\Database\JsonSql::text( 'e.meta', '$.is_starred' );
+			$where  .= " AND {$starred} IN ('true','1')";
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		$range = EntryListFilters::dates( $_GET );
+		$range = EntryListFilters::dates( \LeenkatForms\Security\RequestInput::filters() );
 		if ( false === $range ) {
 			$where .= ' AND 1=0';
 		} elseif ( $range ) {
@@ -259,18 +264,18 @@ final class EntriesListTable extends ManagementTable {
 			}
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		$search_id = absint( $_GET['search_id'] ?? 0 );
+		$search_id = \LeenkatForms\Security\RequestInput::identifier( 'search_id' );
 		if ( $search_id ) {
 			$where .= $wpdb->prepare( ' AND e.id=%d', $search_id );
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		$where .= EntryListFilters::search( $this->fields, $_GET );
+		$where .= EntryListFilters::search( $this->fields, \LeenkatForms\Security\RequestInput::filters() );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Custom plugin tables and transaction control have no equivalent WordPress object API; values are prepared and access is gated by the caller. Fresh custom-table state is required for locking, ownership checks, exports and current admin results; a cache could be stale. Identifiers are fixed plugin table names from the trusted WordPress prefix; dynamic clauses are internal allowlists or already-prepared fragments, never raw request SQL.
 		$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}leenfo_entries e WHERE {$where}" );
 		$per   = $this->perPage( 'leenfo_entries_per_page' );
 		$page  = min( max( 1, $this->get_pagenum() ), max( 1, (int) ceil( $total / $per ) ) );
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		$sort      = ManagementPage::text( $_GET, 'orderby' ) === 'id' ? 'e.id' : 'e.submitted_at_gmt';
+		$sort      = \LeenkatForms\Security\RequestInput::get( 'orderby' ) === 'id' ? 'e.id' : 'e.submitted_at_gmt';
 		$direction = $this->sortDirection();
 		// Join each immutable snapshot once; never render uploaded paths from a raw payload.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,PluginCheck.Security.DirectDB.UnescapedDBParameter,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Custom plugin tables and transaction control have no equivalent WordPress object API; values are prepared and access is gated by the caller. Fresh custom-table state is required for locking, ownership checks, exports and current admin results; a cache could be stale. Identifiers are fixed plugin table names from the trusted WordPress prefix; dynamic clauses are internal allowlists or already-prepared fragments, never raw request SQL.
@@ -366,9 +371,9 @@ final class EntriesListTable extends ManagementTable {
 			return;
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		$from = ManagementPage::text( $_GET, 'date_from' );
+		$from = \LeenkatForms\Security\RequestInput::get( 'date_from' );
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		$to = ManagementPage::text( $_GET, 'date_to' );
+		$to = \LeenkatForms\Security\RequestInput::get( 'date_to' );
 		echo '<div class="alignleft actions lkf-date-actions"><details class="lkf-date-range"><summary>' . esc_html( $from || $to ? ( $from ? $from : '…' ) . ' – ' . ( $to ? $to : '…' ) : ( $this->days ? sprintf( /* translators: %d: number of days. */ __( 'Last %d days', 'leenkat-forms' ), $this->days ) : __( 'Select a date range', 'leenkat-forms' ) ) ) . '</summary><div class="lkf-date-popover"><label>' . esc_html__( 'From', 'leenkat-forms' ) . '<input type="date" name="date_from" value="' . esc_attr( $from ) . '"></label><label>' . esc_html__( 'To', 'leenkat-forms' ) . '<input type="date" name="date_to" value="' . esc_attr( $to ) . '"></label></div></details><button class="button" name="leenfo_filter" value="1">' . esc_html__( 'Filter', 'leenkat-forms' ) . '</button></div>';
 	}
 	/**
@@ -421,7 +426,7 @@ final class EntriesListTable extends ManagementTable {
 			)
 		) . '"><span class="dashicons dashicons-download" aria-hidden="true"></span> ' . esc_html__( 'Export Entries', 'leenkat-forms' ) . '</a></div></div>';
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		if ( EntryListFilters::dates( $_GET ) === false ) {
+		if ( EntryListFilters::dates( \LeenkatForms\Security\RequestInput::filters() ) === false ) {
 			echo '<div class="notice notice-error"><p>' . esc_html__( 'Enter a valid date range.', 'leenkat-forms' ) . '</p></div>';
 		}
 		echo '<div class="lkf-list-toolbar lkf-inbox-toolbar">';
@@ -429,7 +434,7 @@ final class EntriesListTable extends ManagementTable {
 		echo '<form method="get" class="lkf-list-search"><input type="hidden" name="page" value="leenkat-forms-entries"><input type="hidden" name="form_id" value="' . (int) $this->form->id . '"><input type="hidden" name="status" value="' . esc_attr( $this->status ) . '"><input type="hidden" name="flag" value="' . esc_attr( $this->flag ) . '">';
 		foreach ( array( 'date_from', 'date_to' ) as $key ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-			echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( ManagementPage::text( $_GET, $key ) ) . '">';
+			echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( \LeenkatForms\Security\RequestInput::get( $key ) ) . '">';
 		}
 		echo '<input type="hidden" name="days" value="' . esc_attr( (string) $this->days ) . '"><label for="lkf-search-field" class="screen-reader-text">' . esc_html__( 'Search field', 'leenkat-forms' ) . '</label><select id="lkf-search-field" name="search_field">';
 		foreach ( array(
@@ -437,7 +442,7 @@ final class EntriesListTable extends ManagementTable {
 			'entry_id' => __( 'Entry ID', 'leenkat-forms' ),
 		) + $this->fields as $key => $label ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-			$search_field = ManagementPage::text( $_GET, 'search_field' );
+			$search_field = \LeenkatForms\Security\RequestInput::get( 'search_field' );
 			echo '<option value="' . esc_attr( $key ) . '"' . selected( $search_field ? $search_field : 'all', $key, false ) . '>' . esc_html( $label ) . '</option>';
 		}
 		echo '</select><label for="lkf-search-operator" class="screen-reader-text">' . esc_html__( 'Search comparison', 'leenkat-forms' ) . '</label><select id="lkf-search-operator" name="search_operator">';
@@ -448,11 +453,11 @@ final class EntriesListTable extends ManagementTable {
 			'not_equals'   => __( 'is not', 'leenkat-forms' ),
 		) as $key => $label ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-			$search_operator = ManagementPage::text( $_GET, 'search_operator' );
+			$search_operator = \LeenkatForms\Security\RequestInput::get( 'search_operator' );
 			echo '<option value="' . esc_attr( $key ) . '"' . selected( $search_operator ? $search_operator : 'contains', $key, false ) . '>' . esc_html( $label ) . '</option>';
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		echo '</select><label for="lkf-search" class="screen-reader-text">' . esc_html__( 'Search Entries', 'leenkat-forms' ) . '</label><input type="search" id="lkf-search" name="s" value="' . esc_attr( ManagementPage::text( $_GET, 's' ) ) . '"><button class="button">' . esc_html__( 'Search', 'leenkat-forms' ) . '</button></form></div>';
+		echo '</select><label for="lkf-search" class="screen-reader-text">' . esc_html__( 'Search Entries', 'leenkat-forms' ) . '</label><input type="search" id="lkf-search" name="s" value="' . esc_attr( \LeenkatForms\Security\RequestInput::get( 's' ) ) . '"><button class="button">' . esc_html__( 'Search', 'leenkat-forms' ) . '</button></form></div>';
 		$context = array(
 			'form_id' => (int) $this->form->id,
 			'status'  => $this->status,
@@ -461,7 +466,7 @@ final class EntriesListTable extends ManagementTable {
 		);
 		foreach ( array( 'search_field', 'search_operator' ) as $key ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-			$context[ $key ] = ManagementPage::text( $_GET, $key );
+			$context[ $key ] = \LeenkatForms\Security\RequestInput::get( $key );
 		}
 		$this->pageForm( 'leenfo_entries_bulk', 'leenfo_entries_bulk_' . (int) $this->form->id, $context );
 		echo '</div>';

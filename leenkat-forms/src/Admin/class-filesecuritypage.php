@@ -35,9 +35,10 @@ final class FileSecurityPage {
 	 */
 	public static function action(): void {
 		self::gate();
+		\LeenkatForms\Security\RequestInput::nonce_request();
 		check_admin_referer( 'leenfo_file_maintenance' );
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values are exact-compared against a closed enum/literal or validated by the existing schema; sanitizing approval flags could turn a malformed value into approval.
-		$operation = $_POST['operation'] ?? '';
+		$operation = \LeenkatForms\Security\RequestInput::control( 'operation', true );
 		if ( ! is_string( $operation ) ) {
 			wp_die( esc_html__( 'Invalid operation.', 'leenkat-forms' ), '', array( 'response' => 400 ) );
 		}
@@ -47,17 +48,17 @@ final class FileSecurityPage {
 				$run    = $result['run_id'];
 			} elseif ( 'copy' === $operation || 'finalize' === $operation ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Identifier/token is type-checked and validated by the existing digit/hex grammar and ownership/nonce gate before lookup or maintenance; keep exact identity.
-				$run = is_string( $_POST['run_id'] ?? null ) ? $_POST['run_id'] : '';
+				$run = \LeenkatForms\Security\RequestInput::control( 'run_id', true );
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Identifier/token is type-checked and validated by the existing digit/hex grammar and ownership/nonce gate before lookup or maintenance; keep exact identity.
-				if ( 'finalize' === $operation && ( $_POST['confirm_remove'] ?? '' ) !== '1' ) {
+				if ( 'finalize' === $operation && \LeenkatForms\Security\RequestInput::control( 'confirm_remove', true ) !== '1' ) {
 					throw new \RuntimeException( __( 'Explicit approval to remove legacy public copies is required.', 'leenkat-forms' ) );
 				}
 				Migration::apply( $run, 'finalize' === $operation );
 			} elseif ( 'rollback' === $operation ) {
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Identifier/token is type-checked and validated by the existing digit/hex grammar and ownership/nonce gate before lookup or maintenance; keep exact identity.
-				$run = is_string( $_POST['run_id'] ?? null ) ? $_POST['run_id'] : '';
+				$run = \LeenkatForms\Security\RequestInput::control( 'run_id', true );
 				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Identifier/token is type-checked and validated by the existing digit/hex grammar and ownership/nonce gate before lookup or maintenance; keep exact identity.
-				if ( ( $_POST['confirm_restore'] ?? '' ) !== '1' ) {
+				if ( \LeenkatForms\Security\RequestInput::control( 'confirm_restore', true ) !== '1' ) {
 					throw new \RuntimeException( __( 'Explicit approval to restore legacy entry references is required.', 'leenkat-forms' ) );
 				}
 				Migration::rollback( $run, true );
@@ -100,7 +101,7 @@ final class FileSecurityPage {
 		$ready = \LeenkatForms\Files\EncryptedStorage::available();
 		echo '<div class="notice ' . ( $ready ? 'notice-success' : 'notice-error' ) . ' inline"><p>' . esc_html( $ready ? __( 'New private uploads are authenticated and encrypted before they are written to WordPress uploads. Downloading plaintext requires authorization.', 'leenkat-forms' ) : __( 'Private storage is unavailable. New private uploads are blocked until the server configuration is corrected.', 'leenkat-forms' ) ) . '</p></div>';
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use. Values are exact-compared against a closed enum/literal or validated by the existing schema; sanitizing approval flags could turn a malformed value into approval.
-		if ( ( $_GET['result'] ?? '' ) === 'ok' ) {
+		if ( \LeenkatForms\Security\RequestInput::control( 'result' ) === 'ok' ) {
 			echo '<div class="notice notice-success inline"><p>' . esc_html__( 'File maintenance completed. Review the migration state below.', 'leenkat-forms' ) . '</p></div>';
 		}
 		$inventory = Migration::inventory();
@@ -126,7 +127,7 @@ final class FileSecurityPage {
 		self::start( 'plan' );
 		echo '<button class="button button-secondary">' . esc_html__( 'Create Dry Run and Verified Backups', 'leenkat-forms' ) . '</button></form>';
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use. Identifier/token is type-checked and validated by the existing digit/hex grammar and ownership/nonce gate before lookup or maintenance; keep exact identity.
-		$run = $_GET['run'] ?? get_option( 'leenfo_file_migration_latest', '' );
+		$run = \LeenkatForms\Security\RequestInput::control( 'run' ) ? \LeenkatForms\Security\RequestInput::control( 'run' ) : get_option( 'leenfo_file_migration_latest', '' );
 		if ( is_string( $run ) && '' !== $run ) {
 			try {
 				$report = Migration::report( Migration::read( $run ) );

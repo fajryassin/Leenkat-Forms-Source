@@ -89,9 +89,9 @@ final class AkismetService {
 		$data = array(
 			'comment_type' => 'contact-form',
 			'user_ip'      => CountryLookup::clientIp( $server ),
-			'user_agent'   => self::text( $server['HTTP_USER_AGENT'] ?? '', 512 ),
+			'user_agent'   => self::text( is_string( $server['HTTP_USER_AGENT'] ?? null ) ? wp_unslash( $server['HTTP_USER_AGENT'] ) : '', 512 ),
 		);
-		$ref  = $server['HTTP_REFERER'] ?? '';if ( is_string( $ref ) && strlen( $ref ) <= 4096 ) {
+		$ref  = is_string( $server['HTTP_REFERER'] ?? null ) ? wp_unslash( $server['HTTP_REFERER'] ) : '';if ( is_string( $ref ) && strlen( $ref ) <= 4096 ) {
 			$parts = wp_parse_url( sanitize_url( $ref, array( 'http', 'https' ) ) );
 			$site  = wp_parse_url( home_url( '/' ) );
 			if ( is_array( $parts ) && is_array( $site ) && strtolower( $parts['host'] ?? '' ) === strtolower( $site['host'] ?? '' ) && in_array( $parts['scheme'] ?? '', array( 'http', 'https' ), true ) && ! isset( $parts['user'] ) && ! isset( $parts['pass'] ) ) {

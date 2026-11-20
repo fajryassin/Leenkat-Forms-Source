@@ -24,6 +24,15 @@ final class Lifecycle {
 			deactivate_plugins( plugin_basename( LEENKAT_FORMS_FILE ) );
 			wp_die( esc_html__( 'Leenkat Forms requires PHP 8.3 or newer.', 'leenkat-forms' ) );
 		}
+		global $wp_version;
+		if ( version_compare( $wp_version, '7.1', '<' ) ) {
+			deactivate_plugins( plugin_basename( LEENKAT_FORMS_FILE ) );
+			wp_die( esc_html__( 'Leenkat Forms requires WordPress 7.1 or newer.', 'leenkat-forms' ) );
+		}
+		if ( ! extension_loaded( 'sodium' ) || ! extension_loaded( 'fileinfo' ) || ! extension_loaded( 'mbstring' ) ) {
+			deactivate_plugins( plugin_basename( LEENKAT_FORMS_FILE ) );
+			wp_die( esc_html__( 'Leenkat Forms requires the PHP Sodium, Fileinfo and Mbstring extensions. Ask your hosting provider to enable them, then activate the plugin again.', 'leenkat-forms' ) );
+		}
 		if ( ! IdentifierUpgrade::run() || ! \LeenkatForms\Infrastructure\Database\Migrations::install() ) {
 			update_option( 'leenfo_migration_error', (string) get_option( 'leenfo_migration_error', __( 'Migration could not complete.', 'leenkat-forms' ) ), false );
 			deactivate_plugins( plugin_basename( LEENKAT_FORMS_FILE ) );

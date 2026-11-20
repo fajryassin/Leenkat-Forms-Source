@@ -11,6 +11,36 @@ namespace LeenkatForms\Frontend;
 /** Explicit form/field scoped query keys. Never prefill consent, CAPTCHA, files or read-only values. */
 final class Prefill {
 	/**
+	 * Read only this form's prefill namespace, normalizing bounded scalar leaves.
+	 *
+	 * @param int $form_id Published form ID.
+	 * @return array Unslashed, sanitized prefill values.
+	 */
+	public static function request( int $form_id ): array {
+		$query = array();
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read-only prefill has no nonce. Keys and each bounded scalar leaf are validated and sanitized below, then definition() applies the published field's semantic schema.
+		foreach ( $_GET as $key => $value ) {
+			if ( ! is_string( $key ) || ! str_starts_with( $key, 'lkf' . $form_id . '_' ) || ! preg_match( '/^[A-Za-z0-9_-]{1,160}$/D', $key ) ) {
+				continue;
+			}
+			$read = static fn( $item ) => is_string( $item ) && strlen( $item ) <= 5000 ? sanitize_textarea_field( wp_unslash( $item ) ) : null;
+			if ( is_array( $value ) ) {
+				if ( ! array_is_list( $value ) || count( $value ) > 100 ) {
+					continue;
+				}
+				$items = array_map( $read, $value );
+				if ( in_array( null, $items, true ) ) {
+					continue;
+				}
+				$query[ $key ] = $items;
+			} else {
+				$query[ $key ] = $read( $value );
+			}
+		}
+		return $query;
+	}
+
+	/**
 	 * Apply the supported prefill data to a form definition.
 	 *
 	 * @param array $definition Form definition being processed.

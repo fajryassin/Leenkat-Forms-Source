@@ -17,8 +17,8 @@ final class EntryListFilters {
 	 * @return array|false Result for the requested operation.
 	 */
 	public static function dates( array $request ): array|false {
-		$start = ManagementPage::text( $request, 'date_from' );
-		$end   = ManagementPage::text( $request, 'date_to' );
+		$start = \LeenkatForms\Security\RequestInput::text( $request, 'date_from' );
+		$end   = \LeenkatForms\Security\RequestInput::text( $request, 'date_to' );
 		if ( '' === $start && '' === $end ) {
 			return array();
 		}
@@ -51,13 +51,13 @@ final class EntryListFilters {
 	 */
 	public static function search( array $fields, array $request ): string {
 		global $wpdb;
-		$text = mb_substr( ManagementPage::text( $request, 's' ), 0, 100 );
+		$text = mb_substr( \LeenkatForms\Security\RequestInput::text( $request, 's' ), 0, 100 );
 		if ( '' === $text ) {
 			return '';
 		}
-		$source   = ManagementPage::text( $request, 'search_field' );
+		$source   = \LeenkatForms\Security\RequestInput::text( $request, 'search_field' );
 		$source   = $source ? $source : 'all';
-		$operator = ManagementPage::text( $request, 'search_operator' );
+		$operator = \LeenkatForms\Security\RequestInput::text( $request, 'search_operator' );
 		$operator = $operator ? $operator : 'contains';
 		if ( ! in_array( $operator, array( 'contains', 'not_contains', 'equals', 'not_equals' ), true ) || ( 'all' !== $source && 'entry_id' !== $source && ! isset( $fields[ $source ] ) ) ) {
 			return ' AND 1=0';
@@ -74,7 +74,9 @@ final class EntryListFilters {
 				// The JSON path is prepared as a value; field IDs can never become SQL syntax.
 				$path = '$.' . wp_json_encode( (string) $id, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Identifiers are fixed plugin table names from the trusted WordPress prefix; dynamic clauses are internal allowlists or already-prepared fragments, never raw request SQL.
-				$parts[] = $wpdb->prepare( "COALESCE(JSON_UNQUOTE(JSON_EXTRACT(e.payload,%s)),'') {$comparison} %s", $path, $pattern );
+				$value = \LeenkatForms\Infrastructure\Database\JsonSql::text( 'e.payload', $path );
+                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The JSON helper prepares its path and accepts only validated internal columns; the comparison is allowlisted and the pattern is prepared here.
+				$parts[] = $wpdb->prepare( "COALESCE({$value},'') {$comparison} %s", $pattern );
 			}
 			if ( 'all' === $source && ctype_digit( $text ) ) {
 				$parts[] = $wpdb->prepare( 'e.id=%d', (int) $text );
@@ -93,7 +95,7 @@ final class EntryListFilters {
 	 */
 	public static function context( array $request ): array {
 		$args = array();foreach ( array( 's', 'search_field', 'search_operator', 'date_from', 'date_to', 'days', 'status', 'flag', 'orderby', 'order' ) as $key ) {
-			$value = ManagementPage::text( $request, $key );
+			$value = \LeenkatForms\Security\RequestInput::text( $request, $key );
 			if ( '' !== $value ) {
 				$args[ $key ] = $value;
 			}

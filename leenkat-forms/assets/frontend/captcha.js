@@ -8,7 +8,7 @@
         if(window[name]?.render&&window[name]?.getResponse)return Promise.resolve(window[name]);
         if(scripts.has(provider))return scripts.get(provider);
         const promise=new Promise((resolve,reject)=>{
-            const callback='lkfCaptchaLoaded_'+provider,script=document.createElement('script');let finished=false;
+            const callback='leenfoCaptchaLoaded_'+provider,script=document.createElement('script');let finished=false;
             const finish=error=>{if(finished)return;finished=true;clearTimeout(timer);if(error){script.remove();reject(error);}else if(window[name])resolve(window[name]);else reject(new Error(config.message));};
             window[callback]=()=>finish();
             const timer=setTimeout(()=>finish(new Error(config.message)),20000);

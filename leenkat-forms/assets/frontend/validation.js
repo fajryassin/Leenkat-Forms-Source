@@ -95,7 +95,7 @@
             for(const [key,message] of Object.entries(incoming))if(/^(?:[a-z][a-z0-9_]{0,31})?$/.test(key)&&typeof message==='string')current.server[key]=message.slice(0,500);
             const invalid=render(form,field);if(!first&&invalid)first=invalid;
         }
-        summary(form);if(first&&moveFocus){if(form._lkfSteps)form._lkfSteps.reveal(first);else focus(first);}return first;
+        summary(form);if(first&&moveFocus){if(form._leenfoSteps)form._leenfoSteps.reveal(first);else focus(first);}return first;
     }
     function hydrate(form){
         for(const field of fields(form))for(const input of field.querySelectorAll('[data-lkf-modern]'))if(input._lkfChoices)target(input);

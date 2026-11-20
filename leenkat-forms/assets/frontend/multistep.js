@@ -2,7 +2,7 @@
     'use strict';
     const api=factory();
     if(typeof module==='object' && module.exports)module.exports=api;
-    if(root)root.lkfSteps=api;
+    if(root)root.leenfoSteps=api;
 })(typeof window==='undefined'?null:window,function(){
     'use strict';
     const __ = typeof window !== 'undefined' && window.wp?.i18n?.__ ? window.wp.i18n.__ : value => value;

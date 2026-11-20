@@ -1,7 +1,7 @@
 (function (root, factory) {
     const api = factory();
     if (typeof module === 'object' && module.exports) module.exports = api;
-    if (root) root.lkfPointerSort = api;
+    if (root) root.leenfoPointerSort = api;
 })(typeof window === 'undefined' ? null : window, function () {
     'use strict';
     function move(items, from, to) {

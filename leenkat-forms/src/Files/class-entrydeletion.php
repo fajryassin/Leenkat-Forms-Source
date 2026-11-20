@@ -98,7 +98,8 @@ final class EntryDeletion {
 				$wpdb->query( 'ROLLBACK' );
 			}
 		}
-		FileRecords::cleanup();
+		LegacyStorageUpgrade::run();
+				FileRecords::cleanup();
 		if ( ! AttachmentMigration::purgeEntryBackups( $id ) ) {
 			$pending   = get_option( 'leenfo_backup_cleanup_pending', array() );
 			$pending[] = $id;

@@ -37,7 +37,7 @@ final class BuilderUi {
 		$config                 = array(
 			'formId'                => $formId, // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase -- Preserve the existing PHP named parameter $formId and its method binding.
             // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-			'initialPreview'        => isset( $_GET['preview'] ) && '1' === $_GET['preview'],
+			'initialPreview'        => '1' === \LeenkatForms\Security\RequestInput::control( 'preview' ),
 			'siteName'              => get_bloginfo( 'name' ),
 			'transferApi'           => rest_url( 'leenkat-forms/v1/admin/transfer/' ),
 			'siteHost'              => (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST ),

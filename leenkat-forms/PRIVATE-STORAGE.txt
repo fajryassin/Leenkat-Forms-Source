@@ -1,70 +1,71 @@
-# Private attachments
+# Private attachments — Leenkat Forms 1.0.1
 
-Stored entry uploads are represented as private WordPress Media Library
-attachments. The image editor, previews and thumbnail generation are unavailable
-for these records. The Media Library file URL is a permission-checked download
-link when the current user can access the linked entry.
+Private entry uploads are private WordPress Media Library attachments. Their
+Media Library URL is a permission-checked download endpoint. Private records
+generate no public thumbnails, previews or image metadata.
 
-The original upload is encrypted as it is written to
-`wp_upload_dir()/leenkat-forms/{form_id}/`. PHP Sodium's XChaCha20-Poly1305
-secretstream authenticates each chunk, object identifier and stream ending.
-A server that serves the object directly can only return authenticated
-ciphertext. WordPress administrators need the entry capability and a download
-nonce. Email links use a signed, scoped token with a seven-day expiration.
-Downloads and the default WordPress mailer read the verified bytes in memory.
-The plugin does not create decrypted files or thumbnail files on disk.
-Sodium is required. There is no plaintext fallback.
+Active storage follows wp_upload_dir(), including custom uploads and Multisite:
+* New form objects: leenkat-forms/{form_id}/
+* Compatibility objects/backups: leenkat-forms-private-{site_identity}/
+* Entry and SQLite migration leases: leenkat-forms/locks/
 
-For older private attachments, Attachment Security can index a verified
-batch into Media without moving the original or changing entry/file IDs.
-Previously public Media Library items keep their historical visibility.
-Content is not persisted as Media when the form's entry storage is disabled.
-Plugins that bypass WordPress's PHPMailer pipeline may require separate
-compatibility verification for notifications with attachments.
+A verified deny-all .htaccess is installed before private objects, partial
+objects or intent markers are written. Parent and target directories are
+protected. Existing registered objects receive protection during the bounded
+upgrade. Apache denies direct requests with normal AuthConfig overrides enabled.
+Nginx and Apache with overrides disabled do not interpret .htaccess: encryption
+remains mandatory and direct requests can return only ciphertext. Ciphertext
+HTTP 200 alone does not establish reviewer approval.
 
-## Backup, relocation and rollback
+Sodium XChaCha20-Poly1305 secretstream authenticates each chunk, object identity
+and stream ending. Full length and SHA-256 verification precede plaintext
+delivery. Authorized downloads and the standard WordPress mailer read verified
+plaintext in memory. No decrypted public temporary files are written. There is
+no plaintext fallback. Preserve the database storage key and WordPress salts
+with backups. Losing the key can make encrypted files unrecoverable.
 
-1. Pause form submissions, downloads, and delivery workers during a relocation.
-   Back up the database (including the encryption key option), uploads, all
-   legacy private files and journals, and the installed plugin. Keep database
-   and file backups separate from public directories, with restricted access.
-   Record a SHA-256 manifest of every private object and journal.
-2. Restore the database and copy the per-form encrypted directories and any historical encrypted directory as units to the
-   destination WordPress uploads directory. The directory name and object names
-   must not change. Verify the copied manifest against the source. Do not
-   generate a replacement key: the original database key must be restored
-   unchanged. WordPress salts do not encrypt attachments; changing them does
-   invalidate old signed email links.
-3. Existing legacy private objects stay where they were. If the old location
-   cannot be retained on the destination, copy it to a verified non-public
-   directory, leave the source untouched, and configure
-   `LEENKAT_FORMS_LEGACY_STORAGE_DIR` to the destination absolute path. This
-   supersedes the old `LKF_PRIVATE_STORAGE_DIR` setting. Do not copy legacy
-   plaintext files into uploads. For old migration journals on a moved site,
-   `LEENKAT_FORMS_LEGACY_SITE_ROOT` may identify the exact former WordPress root
-   string (including the trailing separator); for old upload-path references
-   `LEENKAT_FORMS_LEGACY_UPLOADS_DIR` may identify the former uploads base.
-   Configure these only from the verified backup, not from request input.
-4. Before reopening, compare the manifests and test an old and a new attachment
-   through the authorized download paths. Check that anonymous or invalid
-   authorization cannot yield plaintext. Check a known signed link when salts
-   are retained. Existing legacy private objects are not automatically converted
-   to the new encryption format. Existing explicit legacy public-file migration
-   still requires verified backups and separate approval to remove any source.
-5. If verification fails, keep both copies. Restore the previous directory
-   configuration and the matching database and plugin backup. Earlier builds cannot resolve the new per-form layout: do not downgrade it in place after
-   accepting new submissions. Retain a separate full backup of the newer database
-   and files before rollback, then reconcile post-cutover submissions in an
-   isolated copy so no entries are lost.
+Administrative downloads require the entry capability, ownership checks and an
+action-specific nonce. Email links use separate scoped signed tokens, normally
+valid for seven days. Administrative URLs are not email bearer URLs.
 
-The per-installation random key is in the database, not the uploads directory,
-and is not included in form exports. Losing it makes encrypted objects
-unrecoverable without a backup. An attacker with full database and uploads
-access is outside the direct-public-file threat model.
+Historical private-file upgrade
+1. Back up the database, uploads, historical private directory, keys and salts.
+   Verify hashes and recovery before moving a site.
+2. The former ABSPATH-parent layout is used only to discover historical sources,
+   never for new storage writes. Discovery is recorded in a WordPress option.
+   If a site moved before discovery, the existing
+   LEENKAT_FORMS_LEGACY_STORAGE_DIR configuration constant can identify its
+   restored private source outside public roots. Do not edit plugin files.
+3. Authorized administration or scheduled maintenance copies at most 100
+   registered records per batch. Historical plaintext streams directly into
+   authenticated encrypted compatibility objects in uploads. Original keys,
+   entry references and signed-link identities stay unchanged. Originals are
+   retained. New journals and cursors use WordPress options.
+4. Copies must match recorded length and SHA-256. Repeated runs reuse verified
+   objects. Interrupted owned ciphertext partials can be retried under an
+   exclusive lease. A corrupt completed object fails closed.
+5. Copied historical identities resolve through uploads without the former
+   installation path. Keep originals and the matching backup until a separately
+   approved retention decision. Failed verification never removes the source.
 
-Deactivation and upgrades do not delete stored files. Standard WordPress uninstall
-keeps data by default. If complete deletion was explicitly enabled, uninstall
-verifies ownership and file integrity before cleanup, and refuses unfamiliar
-files, invalid journals, or missing storage configuration. A previous interrupted
-uninstall must be completed using the original matching version/configuration or
-restored from a verified backup before retrying.
+Rollback
+Restore a matching database, plugin, files, keys and salts snapshot. The
+submitted WPCS-clean 1.0.1 baseline can still use retained historical originals
+and unchanged identities. Preserve and reconcile post-snapshot submissions
+before rollback. Different 1.0.1 review builds are not interchangeable backups.
+Do not discard newer entries or remove originals merely because a copy exists.
+
+Uninstall
+Deactivation retains data. Standard WordPress uninstall retains it by default.
+Explicit complete deletion verifies ownership and integrity, uses a durable
+file-first journal, and refuses unknown files, active leases or inconsistent
+configuration. Interrupted cleanup can resume with the same configuration.
+Fixed deny files and empty database-lock inodes may remain, containing no user
+data. Destructive network-wide uninstall remains unsupported and refuses to
+remove site data. Keep the backup for recovery.
+
+Protection requires a supported local filesystem and a secure WordPress
+installation. Full database, key and filesystem compromise is outside the
+direct-public-file threat model. Legacy public uploads still use the separate
+Attachment Security migration and explicit source-removal approval.
+

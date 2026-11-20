@@ -22,6 +22,10 @@ final class FileLease {
 		if ( ! PrivateStorage::noLinks( $root ) || ( $create && ! is_dir( $root ) && ! wp_mkdir_p( $root ) ) ) {
 			throw new \RuntimeException( esc_html__( 'Entry files are unavailable.', 'leenkat-forms' ) );
 		}
+		if ( $create ) {
+			EncryptedStorage::protect( dirname( $root ) );
+			EncryptedStorage::protect( $root );
+		}
 		return $root;
 	}
 

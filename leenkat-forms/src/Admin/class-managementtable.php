@@ -96,7 +96,7 @@ abstract class ManagementTable extends \WP_List_Table {
 	 */
 	protected function sortDirection(): string {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		return strtolower( ManagementPage::text( $_GET, 'order' ) ) === 'asc' ? 'ASC' : 'DESC'; }
+		return strtolower( \LeenkatForms\Security\RequestInput::get( 'order' ) ) === 'asc' ? 'ASC' : 'DESC'; }
 	/**
 	 * Render the row selection checkbox.
 	 *
@@ -117,7 +117,7 @@ abstract class ManagementTable extends \WP_List_Table {
 		echo '<input type="hidden" name="action" value="' . esc_attr( $route ) . '">';
 		foreach ( array( 's', 'orderby', 'order' ) as $name ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-			$context[ $name ] = ManagementPage::text( $_GET, $name );
+			$context[ $name ] = \LeenkatForms\Security\RequestInput::get( $name );
 		}
 		foreach ( $context as $name => $value ) {
 			echo '<input type="hidden" name="' . esc_attr( $name ) . '" value="' . esc_attr( (string) $value ) . '">';

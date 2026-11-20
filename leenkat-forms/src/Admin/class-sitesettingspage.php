@@ -41,17 +41,18 @@ final class SiteSettingsPage {
 			wp_die( esc_html__( 'Access denied.', 'leenkat-forms' ), '', 403 );
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The allowlisted section only selects the nonce action. No settings are read or written before that check.
-		$section = ManagementPage::text( $_POST, 'section' );
+		$section = \LeenkatForms\Security\RequestInput::control( 'section', true );
 		if ( ! in_array( $section, array( 'general', 'email' ), true ) ) {
 			wp_die( esc_html__( 'Invalid settings section.', 'leenkat-forms' ), '', 400 );
 		}
+		\LeenkatForms\Security\RequestInput::nonce_request();
 		check_admin_referer( 'leenfo_site_settings_' . $section );
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The typed payload is parsed below and must pass SiteSettings::validate, which allowlists values before any update.
-		$raw      = isset( $_POST[ $section ] ) && is_array( $_POST[ $section ] ) ? wp_unslash( $_POST[ $section ] ) : array();
+		$raw      = self::posted_input( $section );
 		$value    = self::posted( $section, $raw );
-		$revision = ManagementPage::text( $_POST, 'revision' );
+		$revision = \LeenkatForms\Security\RequestInput::control( 'revision', true );
 		$result   = S::save( $section, $value, $revision );
-		if ( '1' === ManagementPage::text( $_POST, 'leenfo_json' ) ) {
+		if ( '1' === \LeenkatForms\Security\RequestInput::control( 'leenfo_json', true ) ) {
 			if ( is_wp_error( $result ) ) {
 				wp_send_json( array( 'message' => $result->get_error_message() ), $result->get_error_data()['status'] ?? 400 );
 			}
@@ -70,6 +71,51 @@ final class SiteSettingsPage {
 		exit;
 	}
 	/**
+	 * Normalize the allowlisted settings form before its schema is applied.
+	 *
+	 * @param string $section Validated settings section.
+	 * @return array Sanitized typed leaves. Invalid shapes remain invalid.
+	 */
+	private static function posted_input( string $section ): array {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- save() checks manage_options and the section-specific nonce before calling this parser. Every allowed nested leaf is sanitized below according to its scalar or color schema.
+		$input  = isset( $_POST[ $section ] ) && is_array( $_POST[ $section ] ) ? wp_unslash( $_POST[ $section ] ) : array();
+		$clean  = array();
+		$keys   = 'general' === $section
+			? array( 'styling', 'assets_global', 'gdpr_enhancements', 'disable_user_details', 'delete_all_data_on_uninstall' )
+			: array( 'template', 'optimize_sending', 'carbon_copy' );
+		$scalar = static function ( mixed $value ): ?string {
+			if ( ! is_string( $value ) ) {
+				return null;
+			}
+			$plain = $value;
+			$text  = sanitize_text_field( $plain );
+			return $text === $plain ? $text : null;
+		};
+		foreach ( $keys as $key ) {
+			if ( array_key_exists( $key, $input ) ) {
+				$clean[ $key ] = $scalar( $input[ $key ] );
+			}
+		}
+		if ( 'email' === $section ) {
+			foreach ( array( 'light', 'dark' ) as $mode ) {
+				$style          = is_array( $input[ $mode ] ?? null ) ? $input[ $mode ] : array();
+				$clean[ $mode ] = array();
+				foreach ( array( 'background', 'body', 'text', 'links', 'typography', 'header_image', 'header_image_size' ) as $key ) {
+					if ( ! array_key_exists( $key, $style ) ) {
+						continue;
+					}
+					$value = $scalar( $style[ $key ] );
+					if ( in_array( $key, array( 'background', 'body', 'text', 'links' ), true ) ) {
+						$value = is_string( $value ) ? sanitize_hex_color( $value ) : null;
+					}
+					$clean[ $mode ][ $key ] = $value;
+				}
+			}
+		}
+		return $clean;
+	}
+
+	/**
 	 * Read the allowed values from the settings form.
 	 *
 	 * @param string $section Section for this operation.
@@ -79,7 +125,7 @@ final class SiteSettingsPage {
 	private static function posted( string $section, mixed $raw ): array {
 		if ( ! is_array( $raw ) ) {
 			return array();
-		}$bool = static fn( $key )=> ! isset( $raw[ $key ] ) ? false : ( '1' === $raw[ $key ] ? true : $raw[ $key ] );
+		}$bool = static fn( $key )=> ! array_key_exists( $key, $raw ) ? false : ( '1' === $raw[ $key ] ? true : $raw[ $key ] );
 		if ( 'general' === $section ) {
 			return array(
 				'styling'                      => $raw['styling'] ?? null,
@@ -153,7 +199,7 @@ final class SiteSettingsPage {
 			delete_transient( 'leenfo_site_notice_' . get_current_user_id() );
 			echo '<div class="notice notice-error"><p>' . esc_html( $notice ) . '</p></div>';
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use. Values are exact-compared against a closed enum/literal or validated by the existing schema; sanitizing approval flags could turn a malformed value into approval.
-		} elseif ( ( $_GET['saved'] ?? '' ) === '1' ) {
+		} elseif ( \LeenkatForms\Security\RequestInput::control( 'saved' ) === '1' ) {
 			echo '<div class="notice notice-success"><p>' . esc_html__( 'Settings saved.', 'leenkat-forms' ) . '</p></div>';
 		}echo '</div>';
 		echo '<h2>' . ( 'general' === $section ? esc_html__( 'General', 'leenkat-forms' ) : esc_html__( 'Email', 'leenkat-forms' ) ) . '</h2><p>' . esc_html( 'general' === $section ? __( 'Manage form styling, compatibility and privacy for this site.', 'leenkat-forms' ) : __( 'Customize the default email template and appearance used by form notifications.', 'leenkat-forms' ) ) . '</p><form action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" method="post" novalidate data-lkf-site-settings="' . esc_attr( $section ) . '">';
@@ -168,7 +214,7 @@ final class SiteSettingsPage {
 		submit_button( __( 'Save Settings', 'leenkat-forms' ), 'primary', 'submit', false );
 		echo '<span data-lkf-save-progress role="status"></span></div></form>';
 		if ( 'email' === $section ) {
-			echo '<dialog class="lkf-email-dialog" data-lkf-email-dialog aria-labelledby="lkf-email-dialog-title"><header><h2 id="lkf-email-dialog-title">' . esc_html__( 'Email Preview', 'leenkat-forms' ) . '</h2><button type="button" data-lkf-close-preview aria-label="' . esc_attr__( 'Close email preview', 'leenkat-forms' ) . '">×</button></header><iframe title="' . esc_attr__( 'Email template preview', 'leenkat-forms' ) . '" sandbox="" referrerpolicy="no-referrer"></iframe></dialog>';
+			echo '<dialog class="lkf-email-dialog" data-lkf-email-dialog aria-labelledby="lkf-email-dialog-title"><header><h2 id="lkf-email-dialog-title">' . esc_html__( 'Email Preview', 'leenkat-forms' ) . '</h2><button type="button" data-lkf-close-preview aria-label="' . esc_attr__( 'Close email preview', 'leenkat-forms' ) . '">Ã—</button></header><iframe title="' . esc_attr__( 'Email template preview', 'leenkat-forms' ) . '" sandbox="" referrerpolicy="no-referrer"></iframe></dialog>';
 		}
 		echo '</div>';
 	}
@@ -184,12 +230,12 @@ final class SiteSettingsPage {
 			'none' => __( 'No styling', 'leenkat-forms' ),
 		) as $key => $label ) {
 			echo '<option value="' . esc_attr( $key ) . '" ' . selected( $s['styling'], $key, false ) . '>' . esc_html( $label ) . '</option>';
-		}echo '</select><p class="description">' . esc_html__( 'Full styling uses the Leenkat appearance. Base styling keeps the layout and inherits your site’s appearance. No styling leaves appearance to your theme; essential visibility rules remain active.', 'leenkat-forms' ) . '</p></div></div>';
+		}echo '</select><p class="description">' . esc_html__( 'Full styling uses the Leenkat appearance. Base styling keeps the layout and inherits your siteâ€™s appearance. No styling leaves appearance to your theme; essential visibility rules remain active.', 'leenkat-forms' ) . '</p></div></div>';
 		self::toggle( 'general[assets_global]', 'lkf-assets-global', __( 'Load Assets Globally', 'leenkat-forms' ), $s['assets_global'], __( 'Load local form scripts and styles on every frontend page for compatibility. Leave off for normal use. CAPTCHA services still load only on protected forms.', 'leenkat-forms' ) );
 		echo '</div><section class="lkf-site-section"><h3>' . esc_html__( 'GDPR', 'leenkat-forms' ) . '</h3>';
 		self::toggle( 'general[gdpr_enhancements]', 'lkf-gdpr-enhancements', __( 'GDPR Enhancements', 'leenkat-forms' ), $s['gdpr_enhancements'], __( 'Show the privacy options below. Turning this off pauses their global effect and keeps your choices saved.', 'leenkat-forms' ), 'lkf-gdpr-options' );
 		echo '<div id="lkf-gdpr-options" data-lkf-gdpr-options' . ( ! $s['gdpr_enhancements'] ? ' hidden' : '' ) . '>';
-		self::toggle( 'general[disable_user_details]', 'lkf-disable-user-details', __( 'Disable User Details', 'leenkat-forms' ), $s['disable_user_details'], __( 'Prevent saving IP addresses and user agents in new entries for every form. This global setting takes priority over each form’s General settings. Existing entries are retained.', 'leenkat-forms' ) );
+		self::toggle( 'general[disable_user_details]', 'lkf-disable-user-details', __( 'Disable User Details', 'leenkat-forms' ), $s['disable_user_details'], __( 'Prevent saving IP addresses and user agents in new entries for every form. This global setting takes priority over each formâ€™s General settings. Existing entries are retained.', 'leenkat-forms' ) );
 		echo '</div></section>';
 		echo '<section class="lkf-site-section"><h3>' . esc_html__( 'Data Removal', 'leenkat-forms' ) . '</h3>';
 		self::toggle( 'general[delete_all_data_on_uninstall]', 'lkf-delete-all-data', __( 'Delete All Data on Uninstall', 'leenkat-forms' ), true === $s['delete_all_data_on_uninstall'], __( 'When enabled, deleting Leenkat Forms from WordPress permanently removes its forms, entries, settings, and private attachments. Deactivating or updating the plugin does not delete data.', 'leenkat-forms' ), 'lkf-uninstall-warning' );
@@ -243,7 +289,7 @@ final class SiteSettingsPage {
 				'mono'     => __( 'Monospace', 'leenkat-forms' ),
 			) as $value => $label ) {
 				echo '<option value="' . esc_attr( (string) $value ) . '" ' . selected( $style['typography'], $value, false ) . '>' . esc_html( $label ) . '</option>';
-			}echo '</select><p class="description" id="lkf-font-help-' . esc_attr( $mode ) . '">' . esc_html__( 'Choose the style that’s applied to all text in email notifications.', 'leenkat-forms' ) . '</p></div></div></div>';
+			}echo '</select><p class="description" id="lkf-font-help-' . esc_attr( $mode ) . '">' . esc_html__( 'Choose the style thatâ€™s applied to all text in email notifications.', 'leenkat-forms' ) . '</p></div></div></div>';
 		}
 		echo '</div><div class="lkf-settings-row"><span></span><div><button type="button" class="button-link" data-lkf-open-preview>' . esc_html__( 'Preview Email Template', 'leenkat-forms' ) . '</button><p class="description" data-lkf-preview-status role="status">' . esc_html__( 'Preview uses sample content and the actual email renderer. No email is sent.', 'leenkat-forms' ) . '</p></div></div></div><section class="lkf-site-section"><h3>' . esc_html__( 'Sending', 'leenkat-forms' ) . '</h3>';
 		self::toggle( 'email[optimize_sending]', 'lkf-optimize-email', __( 'Optimize Email Sending', 'leenkat-forms' ), $s['optimize_sending'], __( 'Send notifications for saved entries in the background. When off, try delivery immediately after saving the entry. Forms that do not store entries always send directly. Failed saved-entry deliveries retain automatic retries.', 'leenkat-forms' ) );

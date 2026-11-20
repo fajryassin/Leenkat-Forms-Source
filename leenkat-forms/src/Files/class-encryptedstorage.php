@@ -12,6 +12,7 @@ namespace LeenkatForms\Files;
 final class EncryptedStorage {
 	public const KEY_OPTION = 'leenkat_forms_storage_key_v2';
 	public const MAX_BYTES  = 52428800;
+	public const DENY_RULES = "<IfModule mod_authz_core.c>\nRequire all denied\n</IfModule>\n<IfModule !mod_authz_core.c>\nDeny from all\n</IfModule>\n";
 	private const CHUNK     = 65536;
 	private const MAGIC     = 'LKF2';
 	/**
@@ -20,6 +21,45 @@ final class EncryptedStorage {
 	 * @var array<string, resource>
 	 */
 	private static array $temporary = array();
+
+	/**
+	 * Install Apache protection before any private object or lock is written.
+	 *
+	 * @param string $directory A verified private directory below WordPress uploads.
+	 * @throws \RuntimeException When protection cannot be installed and verified.
+	 */
+	public static function protect( string $directory ): void {
+		$uploads = wp_upload_dir( null, false );
+		$base    = is_string( $uploads['basedir'] ?? null ) ? realpath( $uploads['basedir'] ) : false;
+		$real    = realpath( $directory );
+		if ( ! empty( $uploads['error'] ) || ! $base || ! $real || ! is_dir( $real ) ||
+			! PrivateStorage::inside( $real, $base ) || PrivateStorage::inside( $base, $real ) || ! PrivateStorage::noLinks( $directory ) ) {
+			self::fail();
+		}
+		$path = $real . '/.htaccess';
+		if ( ! PrivateStorage::noLinks( $path ) || ( file_exists( $path ) && ! is_file( $path ) ) ) {
+			self::fail();
+		}
+		if ( is_file( $path ) && hash_equals( hash( 'sha256', self::DENY_RULES ), (string) hash_file( 'sha256', $path ) ) ) {
+			return;
+		}
+		$temp = $real . '/.deny-' . bin2hex( random_bytes( 16 ) );
+		try {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Install the fixed deny rule atomically in the validated local upload directory before publishing encrypted objects.
+			if ( file_put_contents( $temp, self::DENY_RULES, LOCK_EX ) !== strlen( self::DENY_RULES ) ) {
+				self::fail();
+			}
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- The rule must become visible as a complete file in the same private directory before any object is written.
+			if ( ! PrivateStorage::noLinks( $path ) || ! rename( $temp, $path ) ||
+				! hash_equals( hash( 'sha256', self::DENY_RULES ), (string) hash_file( 'sha256', $path ) ) ) {
+				self::fail();
+			}
+		} finally {
+			if ( is_file( $temp ) ) {
+				wp_delete_file_from_directory( $temp, $real );
+			}
+		}
+	}
 
 	/**
 	 * Reject a missing or invalid private storage operation.
@@ -125,6 +165,9 @@ final class EncryptedStorage {
 			if ( ! $canonical || ! $parent || ! is_dir( $canonical ) || ! PrivateStorage::noLinks( $root ) ||
 				! PrivateStorage::inside( $canonical, $parent ) || PrivateStorage::inside( $parent, $canonical ) ) {
 				self::fail(); }
+			if ( $create ) {
+				self::protect( $canonical );
+			}
 			return wp_normalize_path( $canonical );
 		}
 		return wp_normalize_path( $root );
@@ -190,6 +233,10 @@ final class EncryptedStorage {
 				! PrivateStorage::inside( $resolved, $parent ) ) {
 				self::fail();
 			}
+		}
+		if ( $create ) {
+			self::protect( dirname( $root ) );
+			self::protect( $root );
 		}
 		return $root;
 	}

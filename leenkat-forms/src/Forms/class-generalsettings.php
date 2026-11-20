@@ -69,8 +69,8 @@ final class GeneralSettings {
 		// Existing definitions did not collect visitor details. Only an explicit Off opts in.
 		if ( \LeenkatForms\Settings\SiteSettings::disableUserDetails() || ( $settings['disable_ip'] ?? true ) !== false ) {
 			return array(); }
-		$ip    = (string) ( $server['REMOTE_ADDR'] ?? '' );
-		$agent = (string) ( $server['HTTP_USER_AGENT'] ?? '' );
+		$ip    = is_string( $server['REMOTE_ADDR'] ?? null ) ? wp_unslash( $server['REMOTE_ADDR'] ) : '';
+		$agent = is_string( $server['HTTP_USER_AGENT'] ?? null ) ? wp_unslash( $server['HTTP_USER_AGENT'] ) : '';
 		return array(
 			'ip_address' => filter_var( $ip, FILTER_VALIDATE_IP ) ? $ip : '',
 			'user_agent' => substr( sanitize_text_field( $agent ), 0, 500 ),

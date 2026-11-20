@@ -38,6 +38,7 @@ final class GlobalSettings {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'Access denied.', 'leenkat-forms' ), '', 403 );
 		}
+		\LeenkatForms\Security\RequestInput::nonce_request();
 		check_admin_referer( 'leenfo_captcha_settings' );
 		$revision  = is_string( $_POST['revision'] ?? null ) ? sanitize_text_field( wp_unslash( $_POST['revision'] ) ) : null;
 		$provider  = is_string( $_POST['provider'] ?? null ) ? sanitize_key( wp_unslash( $_POST['provider'] ) ) : null;
@@ -47,14 +48,15 @@ final class GlobalSettings {
 				$providers[ $slug ][ $key ] = is_string( $_POST['providers'][ $slug ][ $key ] ?? null )
 					? sanitize_text_field( wp_unslash( $_POST['providers'][ $slug ][ $key ] ) ) : null;
 			}
-			$providers[ $slug ]['remove_secret'] = is_string( $_POST['providers'][ $slug ]['remove_secret'] ?? null ) &&
-				'1' === sanitize_text_field( wp_unslash( $_POST['providers'][ $slug ]['remove_secret'] ) );
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- posted_switch() type-checks, unslashes, sanitizes and exact-validates this nested checkbox. Invalid input remains a schema error rather than deleting a saved secret.
+			$providers[ $slug ]['remove_secret'] = self::posted_switch( $_POST['providers'][ $slug ]['remove_secret'] ?? null );
 		}
 		$result = CaptchaSettings::save(
 			array(
 				'revision'    => $revision,
 				'provider'    => $provider,
-				'no_conflict' => is_string( $_POST['no_conflict'] ?? null ) && '1' === sanitize_text_field( wp_unslash( $_POST['no_conflict'] ) ),
+				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- The typed parser below preserves an invalid checkbox as a schema error.
+				'no_conflict' => self::posted_switch( $_POST['no_conflict'] ?? null ),
 				'providers'   => $providers,
 			)
 		);
@@ -64,6 +66,27 @@ final class GlobalSettings {
 		wp_safe_redirect( admin_url( 'admin.php?page=leenkat-forms-settings&view=captcha&saved=' . ( is_wp_error( $result ) ? '0' : '1' ) ) );
 		exit;
 	}
+	/**
+	 * Parse a checkbox without converting malformed text or arrays into approval.
+	 *
+	 * @param mixed $value WordPress-slash-encoded checkbox input, or null when absent.
+	 * @return bool|array Valid switch or an invalid shape rejected by CaptchaSettings.
+	 */
+	private static function posted_switch( mixed $value ): bool|array {
+		if ( null === $value ) {
+			return false;
+		}
+		if ( ! is_string( $value ) ) {
+			return array();
+		}
+		$plain = wp_unslash( $value );
+		$clean = sanitize_text_field( $plain );
+		if ( $plain !== $clean || ! in_array( $clean, array( '0', '1' ), true ) ) {
+			return array();
+		}
+		return '1' === $clean;
+	}
+
 	/**
 	 * Render the global settings screen.
 	 */
@@ -82,7 +105,7 @@ final class GlobalSettings {
 		$s        = CaptchaSettings::get();
 		$selected = $s['provider'];
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use. Values are exact-compared against a closed enum/literal or validated by the existing schema; sanitizing approval flags could turn a malformed value into approval.
-		$requested = $_GET['provider'] ?? null;
+		$requested = \LeenkatForms\Security\RequestInput::control( 'provider' );
 		if ( is_string( $requested ) && isset( CaptchaSettings::PROVIDERS[ $requested ] ) ) {
 			$selected = $requested;
 		}
@@ -96,7 +119,7 @@ final class GlobalSettings {
 			delete_transient( 'leenfo_settings_notice_' . get_current_user_id() );
 			echo '<div class="notice notice-error"><p>' . esc_html( $notice ) . '</p></div>';
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use. Values are exact-compared against a closed enum/literal or validated by the existing schema; sanitizing approval flags could turn a malformed value into approval.
-		} elseif ( ( $_GET['saved'] ?? '' ) === '1' ) {
+		} elseif ( \LeenkatForms\Security\RequestInput::control( 'saved' ) === '1' ) {
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Settings saved. Enable CAPTCHA for each form in Spam Protection and Security.', 'leenkat-forms' ) . '</p></div>';
 		}
 		echo ( '<h2>' . esc_html__( 'CAPTCHA', 'leenkat-forms' ) . '</h2><p>' ) . esc_html__( 'Choose a CAPTCHA service to help protect your forms from automated spam.', 'leenkat-forms' ) . '</p><form action="' . esc_url( admin_url( 'admin-post.php' ) ) . '" method="post" data-lkf-settings>';

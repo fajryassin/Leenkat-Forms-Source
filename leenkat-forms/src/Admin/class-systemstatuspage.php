@@ -111,8 +111,8 @@ final class SystemStatusPage {
 		}
 		$health = null;
 		$failed = false;
-        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Server method/length metadata is compared with exact literals or cast and bounded; it is not WordPress-slash-encoded form content or HTML output.
-		if ( ( $_SERVER['REQUEST_METHOD'] ?? 'GET' ) === 'POST' && ( $_POST['leenfo_run_diagnostics'] ?? '' ) === '1' ) {
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Valid method and length literals contain no slash-sensitive characters. Strict literal comparisons reject malformed metadata before use or mutation.
+		if ( ( $_SERVER['REQUEST_METHOD'] ?? 'GET' ) === 'POST' && '1' === \LeenkatForms\Security\RequestInput::control( 'leenfo_run_diagnostics', true ) ) {
 			$nonce = is_string( $_POST['_wpnonce'] ?? null ) ? sanitize_text_field( wp_unslash( $_POST['_wpnonce'] ) ) : '';
 			if ( ! wp_verify_nonce( $nonce, 'leenfo_run_diagnostics' ) ) {
 				wp_die( esc_html__( 'Access denied or session expired. Reload and try again.', 'leenkat-forms' ), '', array( 'response' => 403 ) );

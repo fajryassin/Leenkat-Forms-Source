@@ -22,9 +22,9 @@ final class ManagementPage {
 	 */
 	public static function load(): void {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		$entries = 'leenkat-forms-entries' === self::text( $_GET, 'page' );
+		$entries = 'leenkat-forms-entries' === \LeenkatForms\Security\RequestInput::get( 'page' );
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		if ( $entries && absint( $_GET['entry_id'] ?? 0 ) ) {
+		if ( $entries && \LeenkatForms\Security\RequestInput::identifier( 'entry_id' ) ) {
 			return;
 		}
 		$option = $entries ? 'leenfo_entries_per_page' : 'leenfo_forms_per_page';
@@ -42,11 +42,11 @@ final class ManagementPage {
 				'manage_' . $screen->id . '_columns',
 				static function () use ( $entries ): array {
 					// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-					if ( $entries && absint( $_GET['entry_id'] ?? 0 ) ) {
+					if ( $entries && \LeenkatForms\Security\RequestInput::identifier( 'entry_id' ) ) {
 						return array();
 					}
 					// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-					$id = $entries ? absint( $_GET['form_id'] ?? 0 ) : 0;
+					$id = $entries ? \LeenkatForms\Security\RequestInput::identifier( 'form_id' ) : 0;
 					if ( $id ) {
 						global $wpdb;
 						// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin tables and transaction control have no equivalent WordPress object API; values are prepared and access is gated by the caller. Fresh custom-table state is required for locking, ownership checks, exports and current admin results; a cache could be stale.
@@ -66,7 +66,7 @@ final class ManagementPage {
 						return $hidden;
 					}
 					// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-					$id = absint( $_GET['form_id'] ?? 0 );
+					$id = \LeenkatForms\Security\RequestInput::identifier( 'form_id' );
 					if ( $id ) {
 						global $wpdb;
 						// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin tables and transaction control have no equivalent WordPress object API; values are prepared and access is gated by the caller. Fresh custom-table state is required for locking, ownership checks, exports and current admin results; a cache could be stale.
@@ -103,16 +103,16 @@ final class ManagementPage {
 	 */
 	public static function assets(): void {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		if ( ! in_array( self::text( $_GET, 'page' ), array( 'leenkat-forms-all', 'leenkat-forms-entries', 'leenkat-forms-file-security' ), true ) ) {
+		if ( ! in_array( \LeenkatForms\Security\RequestInput::get( 'page' ), array( 'leenkat-forms-all', 'leenkat-forms-entries', 'leenkat-forms-file-security' ), true ) ) {
 			return;
 		}
 		wp_enqueue_style( 'leenfo-management', plugins_url( 'assets/admin/management.css', LEENKAT_FORMS_FILE ), array(), LEENKAT_FORMS_VERSION . '.' . filemtime( LEENKAT_FORMS_DIR . 'assets/admin/management.css' ) );
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		if ( 'leenkat-forms-file-security' === self::text( $_GET, 'page' ) ) {
+		if ( 'leenkat-forms-file-security' === \LeenkatForms\Security\RequestInput::get( 'page' ) ) {
 			return;
 		}
 		wp_enqueue_script( 'leenfo-management', plugins_url( 'assets/admin/management.js', LEENKAT_FORMS_FILE ), array(), LEENKAT_FORMS_VERSION, true );
-		wp_localize_script( 'leenfo-management', 'lkfManagement', array( 'deleteWarning' => __( 'Permanently delete the selected items? This cannot be undone.', 'leenkat-forms' ) ) );
+		wp_localize_script( 'leenfo-management', 'leenfoManagement', array( 'deleteWarning' => __( 'Permanently delete the selected items? This cannot be undone.', 'leenkat-forms' ) ) );
 	}
 	/**
 	 * Read a scalar text value from request data.
@@ -174,9 +174,9 @@ final class ManagementPage {
 	 */
 	public static function days(): int {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		$days = (int) self::text( $_GET, 'days' );
+		$days = (int) \LeenkatForms\Security\RequestInput::get( 'days' );
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		return in_array( $days, array( 7, 30, 90 ), true ) ? $days : ( '0' === self::text( $_GET, 'days' ) ? 0 : 30 );
+		return in_array( $days, array( 7, 30, 90 ), true ) ? $days : ( '0' === \LeenkatForms\Security\RequestInput::get( 'days' ) ? 0 : 30 );
 	}
 	/**
 	 * Open the management screen wrapper.
@@ -196,7 +196,7 @@ final class ManagementPage {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
 		if ( isset( $_GET['leenfo_result'] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-			$ok = 'ok' === self::text( $_GET, 'leenfo_result' );
+			$ok = 'ok' === \LeenkatForms\Security\RequestInput::get( 'leenfo_result' );
 			echo '<div class="notice ' . ( $ok ? 'notice-success' : 'notice-error' ) . ' is-dismissible"><p>' . esc_html( $ok ? __( 'Action completed.', 'leenkat-forms' ) : __( 'Some items could not be updated. Forms with entries cannot be permanently deleted.', 'leenkat-forms' ) ) . '</p></div>';
 		}
 	}
@@ -253,14 +253,14 @@ final class ManagementPage {
 	 */
 	public static function requestOperation(): array { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid -- Preserve the existing callable method name for PHP callers and callback compatibility.
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The enclosing admin handler enforces its capability and dedicated nonce through gate(), requirePost(), check_admin_referer() or wp_verify_nonce(); flags/type checks before that gate do not perform mutations.
-		$row = self::text( $_POST, 'leenfo_row_action' );
+		$row = \LeenkatForms\Security\RequestInput::control( 'leenfo_row_action', true );
 		if ( '' !== $row && preg_match( '/^([a-z_]+):([1-9][0-9]{0,17})$/D', $row, $m ) ) {
 			return array( $m[1], array( (int) $m[2] ) );
 		}
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The enclosing admin handler enforces its capability and dedicated nonce through gate(), requirePost(), check_admin_referer() or wp_verify_nonce(); flags/type checks before that gate do not perform mutations.
-		$key = 'bottom' === self::text( $_POST, 'leenfo_apply' ) ? 'operation2' : 'operation';
+		$key = 'bottom' === \LeenkatForms\Security\RequestInput::control( 'leenfo_apply', true ) ? 'operation2' : 'operation';
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- The enclosing admin handler enforces its capability and dedicated nonce through gate(), requirePost(), check_admin_referer() or wp_verify_nonce(); flags/type checks before that gate do not perform mutations. Selection is validated element-by-element by ids(); text() unslashes and sanitizes its scalar argument before use.
-		return array( self::text( $_POST, $key ), self::ids( wp_unslash( $_POST['item_ids'] ?? array() ) ) );
+		return array( \LeenkatForms\Security\RequestInput::control( $key, true ), \LeenkatForms\Security\RequestInput::ids( 'item_ids' ) );
 	}
 	/**
 	 * Return the display label for a management operation.
@@ -289,7 +289,7 @@ final class ManagementPage {
 	 * Reject methods other than POST for a management action.
 	 */
 	public static function requirePost(): void { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid -- Preserve the existing callable method name for PHP callers and callback compatibility.
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Server method/length metadata is compared with exact literals or cast and bounded; it is not WordPress-slash-encoded form content or HTML output.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Valid method and length literals contain no slash-sensitive characters. Strict literal comparisons reject malformed metadata before use or mutation.
 		if ( ( $_SERVER['REQUEST_METHOD'] ?? '' ) !== 'POST' ) {
 			wp_die( esc_html__( 'Use a POST request for this action.', 'leenkat-forms' ), '', array( 'response' => 405 ) );
 		}
@@ -302,24 +302,24 @@ final class ManagementPage {
 	 */
 	public static function paginationRequest( string $page, array $context = array() ): void { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid -- Preserve the existing callable method name for PHP callers and callback compatibility.
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The enclosing admin handler enforces its capability and dedicated nonce through gate(), requirePost(), check_admin_referer() or wp_verify_nonce(); flags/type checks before that gate do not perform mutations.
-		if ( '' !== self::text( $_POST, 'leenfo_row_action' ) || ! isset( $_POST['paged'] ) || ! is_scalar( $_POST['paged'] ) ) {
+		if ( '' !== \LeenkatForms\Security\RequestInput::control( 'leenfo_row_action', true ) || ! isset( $_POST['paged'] ) || ! is_scalar( $_POST['paged'] ) ) {
 			return;
 		}
 		// Enter in the current-page input may implicitly submit the first Apply button.
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The enclosing admin handler enforces its capability and dedicated nonce through gate(), requirePost(), check_admin_referer() or wp_verify_nonce(); flags/type checks before that gate do not perform mutations.
-		$key = 'bottom' === self::text( $_POST, 'leenfo_apply' ) ? 'operation2' : 'operation';
+		$key = 'bottom' === \LeenkatForms\Security\RequestInput::control( 'leenfo_apply', true ) ? 'operation2' : 'operation';
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The enclosing admin handler enforces its capability and dedicated nonce through gate(), requirePost(), check_admin_referer() or wp_verify_nonce(); flags/type checks before that gate do not perform mutations.
-		if ( ! empty( $_POST['item_ids'] ) || ! in_array( self::text( $_POST, $key ), array( '', '-1' ), true ) ) {
+		if ( ! empty( $_POST['item_ids'] ) || ! in_array( \LeenkatForms\Security\RequestInput::post( $key ), array( '', '-1' ), true ) ) {
 			return;
 		}
 		$args = array(
 			'page'  => $page,
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The enclosing admin handler enforces its capability and dedicated nonce through gate(), requirePost(), check_admin_referer() or wp_verify_nonce(); flags/type checks before that gate do not perform mutations.
-			'paged' => max( 1, min( 1000000, (int) $_POST['paged'] ) ),
+			'paged' => max( 1, min( 1000000, \LeenkatForms\Security\RequestInput::identifier( 'paged', true ) ) ),
 		);
 		foreach ( array( 's', 'orderby', 'order', 'status', 'flag', 'days', 'search_field', 'search_operator', 'date_from', 'date_to' ) as $key ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- The enclosing admin handler enforces its capability and dedicated nonce through gate(), requirePost(), check_admin_referer() or wp_verify_nonce(); flags/type checks before that gate do not perform mutations.
-			$value = self::text( $_POST, $key );
+			$value = \LeenkatForms\Security\RequestInput::post( $key );
 			if ( '' !== $value ) {
 				$args[ $key ] = $value;
 			}

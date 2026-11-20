@@ -17,6 +17,10 @@ require_once __DIR__ . '/src/Files/class-privatestorage.php';
 require_once __DIR__ . '/src/Files/class-encryptedstorage.php';
 require_once __DIR__ . '/src/Files/class-filerecords.php';
 require_once __DIR__ . '/src/Files/class-attachmentmigration.php';
+require_once __DIR__ . '/src/Bootstrap/class-identifierupgrade.php';
+require_once __DIR__ . '/src/Infrastructure/Database/class-migrationlock.php';
+require_once __DIR__ . '/src/Files/class-filelease.php';
+require_once __DIR__ . '/src/Files/class-privatemedia.php';
 require_once __DIR__ . '/src/Bootstrap/class-uninstaller.php';
 try {
 	\LeenkatForms\Bootstrap\Uninstaller::run();

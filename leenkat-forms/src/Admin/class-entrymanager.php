@@ -29,9 +29,9 @@ final class EntryManager {
 		global $wpdb;
 		$table = $wpdb->prefix . 'leenfo_entries';
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		$form_id = absint( $_GET['form_id'] ?? 0 );
+		$form_id = \LeenkatForms\Security\RequestInput::identifier( 'form_id' );
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use.
-		$entry_id = absint( $_GET['entry_id'] ?? 0 );
+		$entry_id = \LeenkatForms\Security\RequestInput::identifier( 'entry_id' );
 		if ( ! $entry_id ) {
 			if ( ! $form_id ) {
 				( new FormsListTable( true ) )->renderPage();
@@ -60,9 +60,10 @@ final class EntryManager {
 		if ( ! current_user_can( \LeenkatForms\Security\Capabilities::VIEW_ENTRIES ) ) {
 			wp_die( esc_html__( 'Access denied.', 'leenkat-forms' ), '', array( 'response' => 403 ) ); }
 		ManagementPage::requirePost();
-		$id = absint( $_POST['entry_id'] ?? 0 );
+		$id = \LeenkatForms\Security\RequestInput::identifier( 'entry_id', true );
+		\LeenkatForms\Security\RequestInput::nonce_request();
 		check_admin_referer( 'leenfo_entry_action_' . $id );
-		$operation = sanitize_key( (string) ( $_POST['operation'] ?? '' ) );
+		$operation = \LeenkatForms\Security\RequestInput::control( 'operation', true );
 		global $wpdb;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin tables and transaction control have no equivalent WordPress object API; values are prepared and access is gated by the caller. Fresh custom-table state is required for locking, ownership checks, exports and current admin results; a cache could be stale.
 		$form_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT form_id FROM {$wpdb->prefix}leenfo_entries WHERE id=%d", $id ) );
@@ -73,7 +74,7 @@ final class EntryManager {
 					'page'          => 'leenkat-forms-entries',
 					'form_id'       => $form_id,
 					'leenfo_result' => $ok ? 'ok' : 'failed',
-				) + ( ( 'entry' === ManagementPage::text( $_POST, 'return_view' ) && 'delete' !== $operation ) ? array( 'entry_id' => $id ) : array() )
+				) + ( ( 'entry' === \LeenkatForms\Security\RequestInput::control( 'return_view', true ) && 'delete' !== $operation ) ? array( 'entry_id' => $id ) : array() )
 			)
 		);
 		exit;
@@ -147,15 +148,16 @@ final class EntryManager {
 			wp_die( esc_html__( 'Access denied.', 'leenkat-forms' ), '', array( 'response' => 403 ) );
 		}
 		ManagementPage::requirePost();
-		$form_id = absint( $_POST['form_id'] ?? 0 );
+		$form_id = \LeenkatForms\Security\RequestInput::identifier( 'form_id', true );
+		\LeenkatForms\Security\RequestInput::nonce_request();
 		check_admin_referer( 'leenfo_entries_bulk_' . $form_id );
-		if ( '1' === ManagementPage::text( $_POST, 'leenfo_filter' ) ) {
+		if ( '1' === \LeenkatForms\Security\RequestInput::control( 'leenfo_filter', true ) ) {
 			wp_safe_redirect(
 				ManagementPage::url(
 					array(
 						'page'    => 'leenkat-forms-entries',
 						'form_id' => $form_id,
-					) + EntryListFilters::context( $_POST )
+					) + EntryListFilters::context( \LeenkatForms\Security\RequestInput::filters( true ) )
 				)
 			);
 			exit; }
@@ -169,9 +171,9 @@ final class EntryManager {
 				}
 			}
 		}
-		$status  = ManagementPage::text( $_POST, 'status' );
-		$flag    = ManagementPage::text( $_POST, 'flag' );
-		$filters = array_intersect_key( EntryListFilters::context( $_POST ), array_flip( array( 's', 'search_field', 'search_operator', 'date_from', 'date_to', 'orderby', 'order' ) ) );
+		$status  = \LeenkatForms\Security\RequestInput::control( 'status', true );
+		$flag    = \LeenkatForms\Security\RequestInput::control( 'flag', true );
+		$filters = array_intersect_key( EntryListFilters::context( \LeenkatForms\Security\RequestInput::filters( true ) ), array_flip( array( 's', 'search_field', 'search_operator', 'date_from', 'date_to', 'orderby', 'order' ) ) );
 		wp_safe_redirect(
 			ManagementPage::url(
 				array(
@@ -179,7 +181,7 @@ final class EntryManager {
 					'form_id'       => $form_id,
 					'status'        => in_array( $status, array( 'complete', 'spam', 'trashed', 'all' ), true ) ? $status : 'complete',
 					'flag'          => in_array( $flag, array( 'unread', 'starred' ), true ) ? $flag : '',
-					'days'          => (int) ManagementPage::text( $_POST, 'days' ),
+					'days'          => (int) \LeenkatForms\Security\RequestInput::post( 'days' ),
 					'leenfo_result' => $ok ? 'ok' : 'failed',
 				) + $filters
 			)
@@ -211,7 +213,8 @@ final class EntryManager {
 	public static function export(): void {
 		if ( ! current_user_can( \LeenkatForms\Security\Capabilities::VIEW_ENTRIES ) ) {
 			wp_die( esc_html__( 'Access denied.', 'leenkat-forms' ), '', array( 'response' => 403 ) ); }
-		$form_id = absint( $_POST['form_id'] ?? 0 );
+		$form_id = \LeenkatForms\Security\RequestInput::identifier( 'form_id', true );
+		\LeenkatForms\Security\RequestInput::nonce_request();
 		check_admin_referer( 'leenfo_export_entries_' . $form_id );
 		if ( ! $form_id ) {
 			wp_die( esc_html__( 'Choose a form first.', 'leenkat-forms' ), '', array( 'response' => 400 ) ); }

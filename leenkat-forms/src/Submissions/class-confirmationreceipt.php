@@ -105,12 +105,12 @@ final class ConfirmationReceipt {
 	 * Serve the receipt for a verified request.
 	 */
 	public static function show(): void {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Server method/length metadata is compared with exact literals or cast and bounded; it is not WordPress-slash-encoded form content or HTML output.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Valid method and length literals contain no slash-sensitive characters. Strict literal comparisons reject malformed metadata before use or mutation.
 		$receipt = ( $_SERVER['REQUEST_METHOD'] ?? '' ) === 'POST'
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Public receipt/download access uses validated scoped bearer claims or an entry-specific capability/nonce gate; a generic logged-in WordPress nonce is not the public credential. Receipt/download credential is strictly parsed, scoped and cryptographically verified by claims()/ticket(); sanitizing opaque credentials would change their identity.
-			? self::ticket( wp_unslash( $_POST['receipt_ticket'] ?? null ) )
+			? self::ticket( \LeenkatForms\Security\RequestInput::control( 'receipt_ticket', true ) )
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public receipt/download access uses validated scoped bearer claims or an entry-specific capability/nonce gate; a generic logged-in WordPress nonce is not the public credential.
-			: NativeSubmission::receipt( absint( $_GET['leenfo_result_form'] ?? 0 ), $_GET );
+			: NativeSubmission::receipt( \LeenkatForms\Security\RequestInput::identifier( 'leenfo_result_form' ), $_GET );
 		if ( ! $receipt || empty( $receipt['confirmation']['entry_preview'] ) ) {
 			self::privateHeaders();
 			status_header( 410 );

@@ -64,13 +64,17 @@ final class PrivateStorage {
 	public static function root(): string {
 		return EncryptedStorage::root( true );}
 	/**
-	 * Resolve the historical default private upload path.
+	 * Resolve the current WordPress-native compatibility directory.
 	 *
+	 * @throws \RuntimeException When WordPress uploads are unavailable.
 	 * @return string Result for the requested operation.
 	 */
 	public static function legacyDefault(): string { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid -- Preserve the existing callable method name for PHP callers and callback compatibility.
-		$site = rtrim( ABSPATH, '/\\' );
-		return dirname( $site, 2 ) . '/leenkat-private/' . substr( hash( 'sha256', $site . '|' . get_current_blog_id() ), 0, 24 );
+		$uploads = wp_upload_dir( null, false );
+		if ( ! empty( $uploads['error'] ) || ! is_string( $uploads['basedir'] ?? null ) ) {
+			throw new \RuntimeException( esc_html__( 'Private file storage is unavailable.', 'leenkat-forms' ) );
+		}
+		return rtrim( wp_normalize_path( $uploads['basedir'] ), '/' ) . '/leenkat-forms/legacy';
 	}
 	/**
 	 * Check that a legacy storage directory is outside known public roots.
@@ -82,9 +86,9 @@ final class PrivateStorage {
 	public static function outsidePublicRoots( string $path, bool $legacy = false ): bool { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid -- Preserve the existing callable method name for PHP callers and callback compatibility.
 		$site    = rtrim( ABSPATH, '/\\' );
 		$uploads = wp_upload_dir( null, false );
-		// DOCUMENT_ROOT is filesystem metadata, not a WP-slashed form value.
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserve path separators, reject control characters, resolve with realpath(), then compare canonical filesystem roots below. Text sanitizers can silently change valid directory names.
-		$document_root = isset( $_SERVER['DOCUMENT_ROOT'] ) && is_string( $_SERVER['DOCUMENT_ROOT'] ) ? $_SERVER['DOCUMENT_ROOT'] : '';
+		// WordPress slash-encodes $_SERVER. Restore the path once before canonical filesystem validation.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserve the unslashed path separators, reject control characters, resolve with realpath(), then compare canonical filesystem roots below. Text sanitizers can silently change valid directory names.
+		$document_root = isset( $_SERVER['DOCUMENT_ROOT'] ) && is_string( $_SERVER['DOCUMENT_ROOT'] ) ? wp_unslash( $_SERVER['DOCUMENT_ROOT'] ) : '';
 		if ( preg_match( '/[\x00-\x1f\x7f]/', $document_root ) ) {
 			return false;
 		}
@@ -106,8 +110,8 @@ final class PrivateStorage {
 	 * @return string Result for the requested operation.
 	 * @throws \RuntimeException Raised when a required operation cannot complete safely.
 	 */
-	public static function legacyRoot(): string { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid -- Preserve the existing callable method name for PHP callers and callback compatibility.
-		$root = defined( 'LEENKAT_FORMS_LEGACY_STORAGE_DIR' ) ? (string) LEENKAT_FORMS_LEGACY_STORAGE_DIR : ( defined( 'LKF_PRIVATE_STORAGE_DIR' ) ? (string) LKF_PRIVATE_STORAGE_DIR : self::legacyDefault() );
+	public static function legacy_source_root(): string {
+		$root = defined( 'LEENKAT_FORMS_LEGACY_STORAGE_DIR' ) ? (string) LEENKAT_FORMS_LEGACY_STORAGE_DIR : ( defined( 'LKF_PRIVATE_STORAGE_DIR' ) ? (string) LKF_PRIVATE_STORAGE_DIR : ( get_option( 'leenfo_legacy_private_source', '' ) ? get_option( 'leenfo_legacy_private_source', '' ) : self::historical_source() ) );
 		if ( ! preg_match( '~^(?:[A-Za-z]:[/\\\\]|/)~', $root ) || ! self::noLinks( $root ) ) {
 			throw new \RuntimeException( esc_html__( 'Private file storage is unavailable.', 'leenkat-forms' ) );
 		}
@@ -124,6 +128,35 @@ final class PrivateStorage {
 		}
 		return wp_normalize_path( $real );
 	}
+	/**
+	 * Locate the read-only historical default for discovery of pre-upgrade files.
+	 *
+	 * @return string Historical path. No creation or new writes are permitted here.
+	 */
+	private static function historical_source(): string {
+		$site = rtrim( ABSPATH, '/\\\\' );
+		return dirname( $site, 2 ) . '/leenkat-private/' . substr( hash( 'sha256', $site . '|' . get_current_blog_id() ), 0, 24 );
+	}
+
+	/**
+	 * Resolve the current WordPress-native compatibility namespace.
+	 *
+	 * @return string Current uploads path, never an ABSPATH ancestor.
+	 */
+	public static function legacyRoot(): string { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid -- Preserve the callable interface while making the active namespace WordPress-native.
+		return self::legacyDefault();
+	}
+
+	/**
+	 * Derive an encrypted mirror identity without changing persisted legacy link claims.
+	 *
+	 * @param string $key Validated historical storage key.
+	 * @return string Encrypted compatibility object key.
+	 */
+	public static function legacy_alias( string $key ): string {
+		return 'p2-' . hash( 'sha256', 'leenkat-forms-legacy-mirror|' . $key ) . '.lkf';
+	}
+
 	/**
 	 * Check whether a storage key identifies an encrypted file.
 	 *
@@ -152,8 +185,12 @@ final class PrivateStorage {
 		if ( self::encrypted( $key ) ) {
 			return EncryptedStorage::open( $key );
 		}
+		$alias = self::legacy_alias( $key );
+		if ( null !== EncryptedStorage::ciphertext( $alias ) ) {
+			return EncryptedStorage::open( $alias );
+		}
 		try {
-			$root = self::legacyRoot();} catch ( \Throwable ) {
+			$root = self::legacy_source_root();} catch ( \Throwable ) {
 			return null;}
 			$path = $root . DIRECTORY_SEPARATOR . $key;
 			$real = realpath( $path );
@@ -229,8 +266,12 @@ final class PrivateStorage {
 		if ( self::encrypted( $key ) ) {
 			return EncryptedStorage::open( $key, $size, $hash );
 		}
+		$alias = self::legacy_alias( $key );
+		if ( null !== EncryptedStorage::ciphertext( $alias ) ) {
+			return EncryptedStorage::open( $alias, $size, $hash );
+		}
 		$path = self::path( $key );
-		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- A checked file can disappear or become unreadable before hashing. Preserve the false result for the existing integrity check without disclosing the local path.
+        // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- A checked file can disappear or become unreadable before hashing. Preserve the false result for the existing integrity check without disclosing the local path.
 		return $path && filesize( $path ) === $size && hash_equals( $hash, (string) @hash_file( 'sha256', $path ) ) ? $path : null;
 	}
 	/**
@@ -256,7 +297,7 @@ final class PrivateStorage {
 	 * @return string Result for the requested operation.
 	 */
 	private static function object_root( string $key ): string {
-		return self::encrypted( $key ) ? EncryptedStorage::objectRoot( $key ) : self::legacyRoot();}
+		return self::encrypted( $key ) ? EncryptedStorage::objectRoot( $key ) : self::legacy_source_root();}
 	/**
 	 * Mark a private upload as awaiting its entry transaction.
 	 *
@@ -301,7 +342,13 @@ final class PrivateStorage {
 		if ( ! self::noLinks( $candidate ) || ! self::noLinks( $candidate . '.pending' ) || ! self::noLinks( $candidate . '.partial' ) ) {
 			return false;
 		}
-		$path = self::encrypted( $key ) ? EncryptedStorage::ciphertext( $key ) : self::path( $key );
+		if ( ! self::encrypted( $key ) ) {
+			$alias = self::legacy_alias( $key );
+			if ( EncryptedStorage::ciphertext( $alias ) && ! self::remove( $alias ) ) {
+				return false;
+			}
+		}
+		$path = self::encrypted( $key ) ? EncryptedStorage::ciphertext( $key ) : ( is_file( $candidate ) ? $candidate : null );
 		if ( ! $path && file_exists( $candidate ) ) {
 			return false;
 		}
@@ -327,7 +374,7 @@ final class PrivateStorage {
 	public static function reap(): void {
 		global $wpdb;
 		$roots = array();
-		foreach ( array( static fn()=>EncryptedStorage::root(), array( self::class, 'legacyRoot' ) ) as $resolve ) {
+		foreach ( array( static fn()=>EncryptedStorage::root(), array( self::class, 'legacy_source_root' ) ) as $resolve ) {
 			try {
 				$root = $resolve();
 				if ( is_dir( $root ) ) {

@@ -24,3 +24,22 @@ Leenkat Forms is licensed GPLv2 or later. Consult [`leenkat-forms/COPYING`](leen
 Leenkat Forms **1.0.1 is undergoing WordPress.org plugin review**. The source being public does not mean the plugin has been approved or published in the WordPress Plugin Directory.
 
 Project: https://leenkat.com/projects/leenkat-forms/
+
+
+## Verified T5 source snapshot — version 1.0.1
+
+This source tree includes the complete T5 runtime and corresponding build inputs.
+All 180 files under `leenkat-forms/` match the approved T5 QA package byte for byte.
+The plugin version remains 1.0.1. The pinned vendor dependencies, generated assets,
+licenses and build procedure are unchanged.
+
+- QA runtime SHA-256: `6c7a7cdbb6e118f8a10618b65ad3f8089386d0d43585f656e56836a2b499449b`
+- Source companion SHA-256: `233d8ecb9e66c6b06fc360a36aec6a8c8c1bc6f1446d65117c00f1b9c0f08e6c`
+- `T5-RUNTIME-MANIFEST.json` records the exact runtime hashes.
+- `BUILD.md`, `COUNTRY-PROVENANCE.md` and `provenance/upstream-pins.json`
+  document the preferred vendor source, build procedure, licenses and pinned inputs.
+- `leenkat-forms/PRIVATE-STORAGE.txt` documents storage, recovery and operational boundaries.
+
+Publication notes inside the companion build records describe the state when those
+archives were created. This repository now contains the T5 source snapshot.
+Internal QA evidence, databases, credentials and ZIP archives are not included.

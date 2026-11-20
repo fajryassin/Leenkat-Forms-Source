@@ -48,8 +48,7 @@ final class Uninstaller {
 			throw new \RuntimeException( esc_html__( 'Invalid table prefix.', 'leenkat-forms' ) );
 		}
 		$lock = 'leenfo_uninstall_' . substr( hash( 'sha256', DB_NAME . '|' . $wpdb->prefix ), 0, 40 );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin tables and transaction control have no equivalent WordPress object API; values are prepared and access is gated by the caller. Fresh custom-table state is required for locking, ownership checks, exports and current admin results; a cache could be stale.
-		if ( '1' !== (string) $wpdb->get_var( $wpdb->prepare( 'SELECT GET_LOCK(%s,0)', $lock ) ) ) {
+		if ( ! \LeenkatForms\Infrastructure\Database\MigrationLock::acquire( $lock ) ) {
 			throw new \RuntimeException( esc_html__( 'Another uninstall is in progress.', 'leenkat-forms' ) );
 		}
 		try {
@@ -120,8 +119,8 @@ final class Uninstaller {
 			);
 			throw $error;
 		} finally {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom plugin tables and transaction control have no equivalent WordPress object API; values are prepared and access is gated by the caller. Fresh custom-table state is required for locking, ownership checks, exports and current admin results; a cache could be stale.
-			$wpdb->get_var( $wpdb->prepare( 'SELECT RELEASE_LOCK(%s)', $lock ) );}
+			\LeenkatForms\Infrastructure\Database\MigrationLock::release( $lock );
+		}
 	}
 	/**
 	 * Uninstall plugin data for the current site.
@@ -220,7 +219,7 @@ final class Uninstaller {
 	 * @throws \RuntimeException Raised when a required operation cannot complete safely.
 	 */
 	private static function storage_roots(): array {
-		$roots = array( 'legacy' => PrivateStorage::legacyRoot() );
+		$roots = array( 'legacy' => PrivateStorage::legacy_source_root() );
 		if ( null !== get_option( EncryptedStorage::KEY_OPTION, null ) ) {
 			$roots['encrypted'] = EncryptedStorage::root();
 		}
@@ -282,11 +281,17 @@ final class Uninstaller {
 				if ( str_starts_with( $row['storage_key'], 'media:' ) ) {
 					continue;
 				}$add( $row['storage_key'], (int) $row['byte_size'], $row['sha256'] );
+				if ( ! PrivateStorage::encrypted( $row['storage_key'] ) ) {
+					$alias = PrivateStorage::legacy_alias( $row['storage_key'] );
+					if ( EncryptedStorage::ciphertext( $alias ) ) {
+						$add( $alias, (int) $row['byte_size'], $row['sha256'] );
+					}
+				}
 				$kind = PrivateStorage::encrypted( $row['storage_key'] ) ? 'encrypted' : 'legacy';
 				if ( preg_match( '/^p3-([1-9][0-9]{0,18})-/', $row['storage_key'], $match ) ) {
 					$kind = 'form:' . $match[1];
 				}
-				if ( 'private' === $row['status'] && ( ! isset( $roots[ $kind ] ) || ! is_dir( $roots[ $kind ] ) ) ) {
+				if ( 'private' === $row['status'] && ( ! isset( $roots[ $kind ] ) || ! is_dir( $roots[ $kind ] ) ) && ( 'legacy' !== $kind || ! PrivateStorage::matches( $row['storage_key'], (int) $row['byte_size'], $row['sha256'] ) ) ) {
 					throw new \RuntimeException( esc_html__( 'Restore the private storage directory before uninstalling.', 'leenkat-forms' ) );
 				}
 			}
@@ -338,6 +343,9 @@ final class Uninstaller {
 				if ( count( $actual[ $kind ] ) >= 100000 || ! $file->isFile() || ! PrivateStorage::noLinks( $file->getPathname() ) ) {
 					throw new \RuntimeException( esc_html__( 'Storage contains an unverified directory, link or too many files.', 'leenkat-forms' ) );
 				}
+				if ( self::retained_protection( $root, $file->getPathname() ) ) {
+					continue;
+				}
 				$actual[ $kind ][ $file->getFilename() ] = self::digest( $file->getPathname() );
 			}
 			$suffix = 'encrypted' === $kind ? 'lkf' : 'json';
@@ -378,7 +386,13 @@ final class Uninstaller {
 					$result[ $kind ][ $name ] = $digest;
 					continue;
 				}
+				if ( '.htaccess' === $name && hash_equals( hash( 'sha256', EncryptedStorage::DENY_RULES ), $digest['sha256'] ) ) {
+					continue;
+				}
 				$lock_pattern = in_array( $kind, array( 'encrypted', 'locks' ), true ) ? '/^entry-[a-f0-9]{64}\.lock$/D' : '/^entry-[1-9][0-9]*\.lock$/D';
+				if ( 'locks' === $kind && preg_match( '/^database-[a-f0-9]{64}\.lock$/D', $name ) && 0 === $digest['bytes'] ) {
+					continue;
+				}
 				if ( preg_match( $lock_pattern, $name ) && 0 === $digest['bytes'] ) {
 					$result[ $kind ][ $name ] = $digest;
 					continue;}
@@ -397,6 +411,30 @@ final class Uninstaller {
 		return $result;
 	}
 	/**
+	 * Validate an empty synchronization inode or fixed access protection that must remain.
+	 *
+	 * @param string $root Owned storage root.
+	 * @param string $path Candidate retained file.
+	 * @return bool Whether the file is an exact, non-sensitive protection artifact.
+	 */
+	private static function retained_protection( string $root, string $path ): bool {
+		if ( ! PrivateStorage::noLinks( $root ) || ! PrivateStorage::noLinks( $path ) || ! is_file( $path ) ) {
+			return false;
+		}
+		$name = basename( $path );
+		// Windows cannot reopen an inode held with an exclusive SQLite lease. Retain only exact, empty database-lock names; no customer content or deletion authority is inferred from a filename.
+		clearstatcache( true, $path );
+		if ( wp_normalize_path( $root ) === wp_normalize_path( FileLease::root() ) && preg_match( '/^database-[a-f0-9]{64}\\.lock$/D', $name ) && 0 === filesize( $path ) ) {
+			return true;
+		}
+		if ( '.htaccess' !== $name ) {
+			return false;
+		}
+		$digest = self::digest( $path );
+		return hash_equals( hash( 'sha256', EncryptedStorage::DENY_RULES ), $digest['sha256'] );
+	}
+
+	/**
 	 * Remove the verified files selected for uninstall.
 	 *
 	 * @param array $state State for this operation.
@@ -412,7 +450,11 @@ final class Uninstaller {
 			foreach ( new \DirectoryIterator( $root ) as $file ) {
 				if ( $file->isDot() ) {
 					continue;
-				}$name = $file->getFilename();
+				}
+				$name = $file->getFilename();
+				if ( self::retained_protection( $root, $file->getPathname() ) ) {
+					continue;
+				}
 				if ( ! isset( $files[ $name ] ) || basename( $name ) !== $name || ! PrivateStorage::noLinks( $file->getPathname() ) || self::digest( $file->getPathname() ) !== $files[ $name ] ) {
 					throw new \RuntimeException( __( 'Storage changed after the uninstall inventory. Retry only after resolving ownership.', 'leenkat-forms' ) );
 				}
@@ -450,6 +492,20 @@ final class Uninstaller {
 				if ( ! unlink( $path ) ) {
 					throw new \RuntimeException( __( 'A private file could not be removed. Retry deletion after checking permissions.', 'leenkat-forms' ) );
 				}
+			}
+			$retained = false;
+			foreach ( new \DirectoryIterator( $root ) as $file ) {
+				if ( $file->isDot() ) {
+					continue;
+				}
+				if ( ! self::retained_protection( $root, $file->getPathname() ) ) {
+					throw new \RuntimeException( esc_html__( 'Private storage changed during removal.', 'leenkat-forms' ) );
+				}
+				$retained = true;
+			}
+			// Keep fixed deny rules and live database-lock inodes. They contain no user data and must not be deleted while another SQLite process can be waiting.
+			if ( $retained ) {
+				return;
 			}
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Verified private/owned paths require native exclusive-create, bounded streams, leases and atomic cleanup; WP filesystem transports cannot preserve these guarantees.
 			if ( ! PrivateStorage::noLinks( $root ) || ! rmdir( $root ) ) {
@@ -581,7 +637,7 @@ final class Uninstaller {
 	public static function ownedOption( string $name ): bool { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid -- Preserve the existing callable method name for PHP callers and callback compatibility.
 		if ( preg_match( '/^' . AttachmentMigration::JOURNAL_OPTION_PREFIX . '[a-f0-9]{32}$/D', $name ) ) {
 			return true; }
-		if ( in_array( $name, array( PrivateMedia::INDEX_CURSOR, 'leenfo_identifier_schema', 'leenfo_db_version', 'leenfo_installed_version', 'leenfo_migration_lock', 'leenfo_migration_error', 'leenfo_captcha_settings', 'leenfo_captcha_settings_lock', 'leenfo_spam_keywords', 'leenfo_spam_keywords_lock', 'leenfo_site_settings_lock', 'leenfo_file_migration_latest', 'leenfo_file_migration_lock', 'leenfo_backup_cleanup_pending', 'leenfo_file_cleanup_attention' ), true ) ) {
+		if ( in_array( $name, array( PrivateMedia::INDEX_CURSOR, 'leenfo_legacy_private_source', 'leenfo_legacy_private_cursor', 'leenfo_identifier_schema', 'leenfo_db_version', 'leenfo_installed_version', 'leenfo_migration_lock', 'leenfo_migration_error', 'leenfo_captcha_settings', 'leenfo_captcha_settings_lock', 'leenfo_spam_keywords', 'leenfo_spam_keywords_lock', 'leenfo_site_settings_lock', 'leenfo_file_migration_latest', 'leenfo_file_migration_lock', 'leenfo_backup_cleanup_pending', 'leenfo_file_cleanup_attention' ), true ) ) {
 			return true;
 		}
 		if ( preg_match( '/^leenfo_(?:import_(?:done|lock)_[1-9][0-9]*_[a-f0-9]{48}|rate_lock_[a-f0-9]{64}|captcha_pass_[a-f0-9]{64}_lock|akismet_check_[a-f0-9]{64}_lock|unstored_[a-f0-9]{64}_lock)$/D', $name ) ) {

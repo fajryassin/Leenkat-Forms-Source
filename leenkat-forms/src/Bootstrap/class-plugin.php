@@ -90,6 +90,7 @@ final class Plugin {
 				return; }
 		}
 		\LeenkatForms\Bootstrap\Lifecycle::grantCapabilities();
+		\LeenkatForms\Files\LegacyStorageUpgrade::run();
 		if ( get_option( 'leenfo_installed_version' ) !== LEENKAT_FORMS_VERSION ) {
 			update_option( 'leenfo_installed_version', LEENKAT_FORMS_VERSION, false );
 		}
@@ -129,10 +130,13 @@ final class Plugin {
 	 * Load the plugin administration branding assets.
 	 */
 	public static function brandingAssets(): void { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid -- Preserve the existing callable method name for PHP callers and callback compatibility.
-		wp_enqueue_style( 'leenfo-branding', plugins_url( 'assets/admin/branding.css', LEENKAT_FORMS_FILE ), array(), LEENKAT_FORMS_VERSION );
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only routing/filter/presentation input; it changes no data, capabilities are enforced by the page and values are allowlisted/escaped before use. Values are exact-compared against a closed enum/literal or validated by the existing schema; sanitizing approval flags could turn a malformed value into approval.
 		$page = isset( $_GET['page'] ) && is_string( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+		if ( 'elementor/editor/after_enqueue_styles' === current_filter() ) {
+			wp_enqueue_style( 'leenfo-branding', plugins_url( 'assets/admin/branding.css', LEENKAT_FORMS_FILE ), array(), LEENKAT_FORMS_VERSION );
+		}
 		if ( is_admin() && in_array( $page, array( 'leenkat-forms', 'leenkat-forms-all', 'leenkat-forms-entries', 'leenkat-forms-settings', 'leenkat-forms-file-security', 'leenkat-forms-tools', 'leenkat-forms-new' ), true ) ) {
+			wp_enqueue_style( 'leenfo-branding', plugins_url( 'assets/admin/branding.css', LEENKAT_FORMS_FILE ), array(), LEENKAT_FORMS_VERSION );
 			wp_enqueue_style( 'leenfo-admin-theme', plugins_url( 'assets/admin/admin-theme.css', LEENKAT_FORMS_FILE ), array( 'leenfo-branding' ), LEENKAT_FORMS_VERSION . '.' . filemtime( LEENKAT_FORMS_DIR . 'assets/admin/admin-theme.css' ) );
 		}
 	}
